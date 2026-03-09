@@ -694,7 +694,7 @@ async function showTuts(id){
     return;
   }
   try{
-    const res=await fetch('https://white-cell-75b6.mebotcoder.workers.dev/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:'You find YouTube tutorial links. Reply ONLY with a JSON array of 4 objects with keys: title, channel, url. URLs must be real youtube.com/watch links. No markdown, no extra text.'},{role:'user',content:'Find 4 YouTube tutorials for: '+g.name}]})}));
+    const res=await fetch('https://white-cell-75b6.mebotcoder.workers.dev/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:[{role:'system',content:'You find YouTube tutorial links. Reply ONLY with a JSON array of 4 objects with keys: title, channel, url. URLs must be real youtube.com/watch links. No markdown, no extra text.'},{role:'user',content:'Find 4 YouTube tutorials for: '+g.name}]}));
     const data=await res.json();
     const raw=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'[]';
     const clean=raw.replace(/```json|```/g,'').trim();
