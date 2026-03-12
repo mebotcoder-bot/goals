@@ -552,7 +552,7 @@ select.txt-inp{cursor:pointer;}
 </div>
 
 <script>
-const GROQ_KEY="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";
+const GROQ_KEY="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";
 async function groqFetch(messages){const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+GROQ_KEY},body:JSON.stringify({model:"openai/gpt-oss-120b",max_completion_tokens:8192,reasoning_effort:"medium",messages})});return res.json();}
 const{createClient}=supabase;
 const sb=createClient(
