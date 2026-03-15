@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goals — Suited Productions</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#07080f;--s1:#0d0f1a;--s2:#131520;--s3:#191c2a;
+  --b1:#1e2130;--b2:#252840;--text:#dde0ff;--muted:#4a4d6a;--dim:#2a2d3f;
+  --gold:#e8b84b;--gold2:#ffd166;--green:#3dd68c;--blue:#5b9bd5;
+  --red:#e05c7a;--purple:#9b72d4;--orange:#e0945c;--teal:#3dd4d4;
+  --mentor:#a78bfa;--mentor2:#c4b5fd;--comm:#38bdf8;--comm2:#7dd3fc;
+}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;opacity:0.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:24px 16px 120px;}
+.loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:20px;}
+.loading-logo{font-family:'Clash Display',sans-serif;font-size:42px;font-weight:700;letter-spacing:-2px;color:var(--gold2);}
+.loading-logo span{color:var(--text);}
+.spinner{width:28px;height:28px;border:2px solid var(--b1);border-top-color:var(--gold);border-radius:50%;animation:spin 0.7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-sub{font-size:9px;color:var(--muted);letter-spacing:3px;}
+.auth{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998;padding:24px;}
+.auth.show{display:flex;}
+.auth-logo{font-family:'Clash Display',sans-serif;font-size:42px;font-weight:700;letter-spacing:-2px;color:var(--gold2);margin-bottom:4px;}
+.auth-logo span{color:var(--text);}
+.auth-tagline{font-size:9px;color:var(--muted);letter-spacing:3px;margin-bottom:36px;}
+.auth-box{background:var(--s2);border:1px solid var(--b1);border-radius:16px;padding:24px;width:100%;max-width:340px;}
+.auth-label{font-size:9px;color:var(--muted);letter-spacing:3px;text-align:center;margin-bottom:14px;}
+.auth-inp{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:14px 16px;color:var(--text);font-family:'Space Mono',monospace;font-size:15px;outline:none;text-align:center;letter-spacing:2px;transition:border-color 0.2s;margin-bottom:10px;}
+.auth-inp:focus{border-color:var(--gold);}
+.auth-inp::placeholder{color:var(--dim);font-size:11px;letter-spacing:1px;}
+.auth-btn{width:100%;background:var(--gold);border:none;border-radius:10px;padding:14px;color:var(--bg);font-family:'Clash Display',sans-serif;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:background 0.2s;}
+.auth-btn:hover{background:var(--gold2);}
+.auth-err{font-size:9px;color:var(--red);text-align:center;margin-top:10px;min-height:14px;letter-spacing:1px;}
+.auth-hint{font-size:8px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.8;}
+.header{margin-bottom:20px;animation:fadeUp 0.4s ease both;}
+.header-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.logo{font-family:'Clash Display',sans-serif;font-size:38px;font-weight:700;letter-spacing:-2px;line-height:1;}
+.logo span{color:var(--gold2);}
+.user-area{display:flex;flex-direction:column;align-items:flex-end;gap:4px;margin-top:4px;}
+.user-name{font-size:10px;color:var(--gold);letter-spacing:1px;background:rgba(232,184,75,0.08);border:1px solid rgba(232,184,75,0.2);padding:3px 10px;border-radius:20px;}
+.admin-badge{font-size:8px;color:var(--red);background:rgba(224,92,122,0.1);border:1px solid rgba(224,92,122,0.2);padding:2px 8px;border-radius:20px;letter-spacing:1px;}
+.btn-out{background:none;border:1px solid var(--b2);border-radius:6px;padding:3px 8px;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;transition:all 0.2s;letter-spacing:1px;}
+.btn-out:hover{border-color:var(--red);color:var(--red);}
+.header-sub{font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:2px;}
+.sync{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:7px 12px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0;}
+.sync-dot.syncing{background:var(--gold);box-shadow:0 0 6px var(--gold);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.2;}}
+.sync-txt{font-size:8px;color:var(--muted);letter-spacing:2px;}
+.nav{display:flex;gap:2px;margin-bottom:22px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:4px;animation:fadeUp 0.4s 0.06s ease both;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-btn{flex:1;min-width:fit-content;padding:8px 6px;background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;font-weight:700;cursor:pointer;border-radius:9px;transition:all 0.2s;letter-spacing:0.3px;white-space:nowrap;}
+.nav-btn.active{background:var(--s3);color:var(--text);border:1px solid var(--b2);}
+.page{display:none;animation:fadeUp 0.3s ease both;}
+.page.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.sec-label{font-size:8px;letter-spacing:3px;color:var(--muted);margin-bottom:10px;padding-left:2px;}
+.bal-card{background:var(--s2);border:1px solid var(--b1);border-radius:16px;padding:22px;margin-bottom:18px;position:relative;overflow:hidden;}
+.bal-card::before{content:'';position:absolute;top:-40px;right:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(232,184,75,0.08),transparent 70%);pointer-events:none;}
+.bal-label{font-size:8px;color:var(--muted);letter-spacing:3px;margin-bottom:6px;}
+.bal-amt{font-family:'Clash Display',sans-serif;font-size:44px;font-weight:700;color:var(--gold2);line-height:1;margin-bottom:16px;letter-spacing:-2px;}
+.bal-amt em{font-size:18px;color:var(--gold);font-style:normal;font-family:'Space Mono',monospace;font-weight:400;}
+.inp-row{display:flex;gap:8px;}
+.money-inp{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;outline:none;transition:border-color 0.2s;}
+.money-inp:focus{border-color:var(--gold);}
+.btn-gold{background:var(--gold);border:none;border-radius:8px;padding:10px 18px;color:var(--bg);font-family:'Clash Display',sans-serif;font-weight:700;font-size:13px;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+.btn-gold:hover{background:var(--gold2);}
+.cat-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.cat-row::-webkit-scrollbar{display:none;}
+.cat-btn{flex-shrink:0;padding:5px 12px;background:none;border:1px solid var(--b1);border-radius:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.2s;}
+.cat-btn.active,.cat-btn:hover{border-color:var(--b2);color:var(--text);background:rgba(255,255,255,0.03);}
+.afford-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+.afford-card{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:14px;position:relative;overflow:hidden;transition:all 0.2s;cursor:pointer;}
+.afford-card:hover{border-color:var(--b2);transform:translateY(-1px);}
+.afford-card.yes{border-color:rgba(61,214,140,0.2);}
+.afford-card.no{opacity:0.35;}
+.afford-card.custom{border-style:dashed;}
+.green-dot{width:6px;height:6px;border-radius:50%;background:var(--green);position:absolute;top:10px;right:10px;box-shadow:0 0 6px var(--green);}
+.buy-badge{position:absolute;top:8px;right:8px;background:rgba(232,184,75,0.15);border:1px solid rgba(232,184,75,0.3);border-radius:4px;padding:2px 5px;font-size:7px;color:var(--gold);letter-spacing:1px;}
+.af-icon{font-size:24px;margin-bottom:6px;}
+.af-name{font-size:11px;font-weight:700;margin-bottom:2px;line-height:1.2;font-family:'Clash Display',sans-serif;}
+.af-price{font-size:9px;color:var(--muted);}
+.af-del{position:absolute;bottom:8px;right:8px;background:none;border:none;color:var(--dim);cursor:pointer;font-size:16px;display:none;transition:color 0.2s;}
+.afford-card.custom:hover .af-del{display:block;}
+.af-del:hover{color:var(--red);}
+.form-card{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:16px;margin-bottom:18px;}
+.form-title{font-size:8px;color:var(--muted);letter-spacing:3px;margin-bottom:12px;}
+.form-row{display:flex;gap:8px;margin-bottom:8px;}
+.form-row:last-child{margin-bottom:0;}
+.txt-inp{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s;}
+.txt-inp:focus{border-color:var(--b2);}
+.txt-inp::placeholder{color:var(--dim);}
+select.txt-inp{cursor:pointer;}
+.btn-add{background:var(--s1);border:1px solid var(--b2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'Clash Display',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+.btn-add:hover{background:var(--b1);}
+.save-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.save-card{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:16px;animation:fadeUp 0.3s ease both;}
+.save-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.save-name{font-size:14px;font-weight:700;font-family:'Clash Display',sans-serif;}
+.save-target{font-size:11px;color:var(--gold);}
+.save-bar-bg{height:4px;background:var(--dim);border-radius:2px;overflow:hidden;margin-bottom:8px;}
+.save-bar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width 1s cubic-bezier(0.4,0,0.2,1);}
+.save-bar.done{background:linear-gradient(90deg,var(--green),#6ee7b7);}
+.save-bot{display:flex;justify-content:space-between;align-items:center;}
+.save-prog{font-size:9px;color:var(--muted);}
+.save-acts{display:flex;gap:6px;}
+.btn-sm{background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:4px 10px;color:var(--text);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.2s;}
+.btn-sm:hover{border-color:var(--gold);color:var(--gold);}
+.btn-sm.del:hover{border-color:var(--red);color:var(--red);}
+.goals-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.goal-card{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:13px 15px;display:flex;align-items:flex-start;gap:11px;animation:fadeUp 0.3s ease both;transition:opacity 0.3s;}
+.goal-card.done{opacity:0.32;}
+.goal-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--b2);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;color:transparent;transition:all 0.2s;}
+.goal-check.on{background:var(--green);border-color:var(--green);color:#fff;}
+.goal-info{flex:1;min-width:0;}
+.goal-title{font-size:12px;font-weight:700;font-family:'Clash Display',sans-serif;margin-bottom:4px;line-height:1.3;word-break:break-word;}
+.goal-card.done .goal-title{text-decoration:line-through;}
+.goal-tag{font-size:8px;letter-spacing:0.5px;padding:2px 7px;border-radius:4px;}
+.tg{background:rgba(91,155,213,0.1);color:var(--blue);}
+.ta{background:rgba(224,148,92,0.1);color:var(--orange);}
+.tc{background:rgba(61,212,212,0.1);color:var(--teal);}
+.tf{background:rgba(61,214,140,0.1);color:var(--green);}
+.tp{background:rgba(224,92,122,0.1);color:var(--red);}
+.tl{background:rgba(155,114,212,0.1);color:var(--purple);}
+.goal-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;}
+.goal-del{background:none;border:none;color:var(--dim);cursor:pointer;font-size:18px;padding:0 2px;transition:color 0.2s;line-height:1;}
+.goal-del:hover{color:var(--red);}
+.btn-tut{background:none;border:1px solid var(--b1);border-radius:5px;padding:3px 6px;color:var(--muted);font-family:'Space Mono',monospace;font-size:7px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.btn-tut:hover{border-color:var(--purple);color:var(--purple);}
+.filter-row{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-btn{flex-shrink:0;padding:5px 12px;background:none;border:1px solid var(--b1);border-radius:20px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.2s;}
+.filter-btn.active,.filter-btn:hover{border-color:var(--b2);color:var(--text);background:rgba(255,255,255,0.03);}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;}
+.stat{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:12px;text-align:center;}
+.stat-n{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;color:var(--gold2);line-height:1;margin-bottom:3px;}
+.stat-l{font-size:8px;color:var(--muted);letter-spacing:1px;}
+.tut-panel{background:var(--s2);border:1px solid rgba(155,114,212,0.3);border-radius:12px;padding:16px;margin-bottom:12px;animation:fadeUp 0.3s ease both;}
+.tut-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.tut-title{font-size:10px;color:var(--purple);letter-spacing:2px;}
+.tut-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;}
+.tut-for{font-size:11px;font-weight:700;font-family:'Clash Display',sans-serif;margin-bottom:10px;}
+.tut-list{display:flex;flex-direction:column;gap:8px;}
+.tut-item{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all 0.2s;text-decoration:none;display:block;}
+.tut-item:hover{border-color:var(--purple);transform:translateX(3px);}
+.tut-item-title{font-size:11px;color:var(--text);font-weight:700;margin-bottom:3px;line-height:1.3;font-family:'Clash Display',sans-serif;}
+.tut-item-src{font-size:8px;color:var(--muted);letter-spacing:1px;}
+.shop-section{margin-top:14px;padding-top:12px;border-top:1px solid var(--b1);}
+.shop-label{font-size:8px;color:var(--gold);letter-spacing:3px;margin-bottom:8px;}
+.shop-item{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;cursor:pointer;transition:all 0.2s;text-decoration:none;margin-bottom:6px;}
+.shop-item:hover{border-color:var(--gold);transform:translateX(3px);}
+.shop-item-icon{font-size:16px;flex-shrink:0;}
+.shop-item-info{flex:1;}
+.shop-item-name{font-size:11px;font-weight:700;font-family:'Clash Display',sans-serif;color:var(--text);margin-bottom:2px;}
+.shop-item-price{font-size:9px;color:var(--gold);}
+.shop-item-arrow{font-size:11px;color:var(--muted);}
+.mentor-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:16px;background:var(--s2);border:1px solid var(--b1);border-radius:14px;}
+.mentor-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--mentor),var(--purple));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 16px rgba(167,139,250,0.3);}
+.mentor-info{flex:1;}
+.mentor-name{font-family:'Clash Display',sans-serif;font-size:16px;font-weight:700;color:var(--mentor2);}
+.mentor-status{font-size:8px;color:var(--muted);letter-spacing:2px;margin-top:2px;}
+.chat-area{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;max-height:380px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b2) transparent;padding-right:4px;}
+.chat-area::-webkit-scrollbar{width:3px;}
+.chat-area::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+.msg{display:flex;gap:8px;animation:fadeUp 0.3s ease both;}
+.msg.user{flex-direction:row-reverse;}
+.msg-bubble{max-width:80%;padding:10px 14px;border-radius:12px;font-size:11px;line-height:1.6;}
+.msg.ai .msg-bubble{background:var(--s3);border:1px solid var(--b1);border-radius:4px 12px 12px 12px;color:var(--text);}
+.msg.user .msg-bubble{background:linear-gradient(135deg,var(--mentor),var(--purple));color:#fff;border-radius:12px 4px 12px 12px;}
+.msg-icon{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+.msg.ai .msg-icon{background:linear-gradient(135deg,var(--mentor),var(--purple));}
+.msg.user .msg-icon{background:var(--s3);border:1px solid var(--b2);}
+.typing-indicator{display:flex;align-items:center;gap:4px;padding:10px 14px;background:var(--s3);border:1px solid var(--b1);border-radius:4px 12px 12px 12px;width:fit-content;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--mentor);animation:tdot 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:0.2s;}
+.typing-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes tdot{0%,100%{opacity:0.2;transform:translateY(0);}50%{opacity:1;transform:translateY(-3px);}}
+.chat-inp-row{display:flex;gap:8px;}
+.chat-inp{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s;}
+.chat-inp:focus{border-color:var(--mentor);}
+.chat-inp::placeholder{color:var(--dim);font-size:10px;}
+.btn-send{background:linear-gradient(135deg,var(--mentor),var(--purple));border:none;border-radius:10px;padding:11px 16px;color:#fff;font-size:16px;cursor:pointer;transition:opacity 0.2s;flex-shrink:0;}
+.btn-send:hover{opacity:0.85;}
+.btn-send:disabled{opacity:0.4;cursor:not-allowed;}
+.img-preview{max-width:100%;max-height:120px;border-radius:8px;margin-bottom:8px;display:none;}
+.img-preview.show{display:block;}
+.btn-img{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);border-radius:10px;padding:11px 12px;color:var(--mentor);font-size:14px;cursor:pointer;flex-shrink:0;transition:all 0.2s;}
+.btn-img:hover{background:rgba(167,139,250,0.2);}
+.msg-img{max-width:100%;border-radius:8px;margin-bottom:6px;display:block;}
+.mentor-popup{display:none;position:relative;margin-top:10px;background:var(--s2);border:1px solid rgba(167,139,250,0.3);border-radius:14px;padding:14px;}
+.mentor-popup.show{display:block;}
+.mentor-popup-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.mentor-popup-icon{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--mentor),var(--purple));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.mentor-popup-label{font-size:9px;color:var(--mentor);letter-spacing:2px;font-family:'Space Mono',monospace;}
+.mentor-popup-close{margin-left:auto;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0;}
+.mentor-popup-text{font-size:12px;line-height:1.6;color:var(--text);}
+.mentor-typing{display:flex;gap:4px;align-items:center;padding:4px 0;}
+.quick-prompts{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.quick-prompts::-webkit-scrollbar{display:none;}
+.quick-btn{flex-shrink:0;padding:5px 12px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:20px;color:var(--mentor2);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.quick-btn:hover{background:rgba(167,139,250,0.15);}
+.comm-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.comm-tab{flex:1;padding:9px;background:none;border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.comm-tab.active{background:var(--s3);border-color:var(--comm);color:var(--comm);}
+.comm-section{display:none;}
+.comm-section.active{display:block;}
+.feed-post-box{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:14px;margin-bottom:16px;}
+.feed-post-title{font-size:8px;color:var(--muted);letter-spacing:3px;margin-bottom:10px;}
+.feed-textarea{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;resize:none;height:72px;transition:border-color 0.2s;margin-bottom:8px;}
+.feed-textarea:focus{border-color:var(--comm);}
+.feed-textarea::placeholder{color:var(--dim);font-size:10px;}
+.feed-post-row{display:flex;gap:8px;}
+.feed-goal-sel{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:9px 10px;color:var(--text);font-family:'Space Mono',monospace;font-size:10px;outline:none;cursor:pointer;}
+.btn-post{background:var(--comm);border:none;border-radius:8px;padding:9px 16px;color:var(--bg);font-family:'Clash Display',sans-serif;font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;}
+.feed-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.feed-card{background:var(--s2);border:1px solid var(--b1);border-radius:12px;padding:14px;animation:fadeUp 0.3s ease both;}
+.feed-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.feed-user{font-size:10px;color:var(--comm);font-weight:700;letter-spacing:1px;}
+.feed-time{font-size:8px;color:var(--muted);}
+.feed-text{font-size:12px;line-height:1.6;margin-bottom:10px;word-break:break-word;}
+.feed-goal-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.15);border-radius:6px;padding:3px 8px;font-size:9px;color:var(--comm2);margin-bottom:8px;}
+.feed-bot{display:flex;justify-content:space-between;align-items:center;}
+.btn-like{background:none;border:1px solid var(--b1);border-radius:6px;padding:4px 10px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.2s;}
+.btn-like:hover,.btn-like.liked{border-color:var(--red);color:var(--red);}
+.btn-like.liked{background:rgba(224,92,122,0.08);}
+.btn-admin-del{background:none;border:1px solid rgba(224,92,122,0.2);border-radius:6px;padding:3px 8px;color:var(--red);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;}
+.btn-admin-del:hover{background:rgba(224,92,122,0.1);}
+.live-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 14px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0;}
+.live-txt{font-size:9px;color:var(--muted);letter-spacing:2px;flex:1;}
+.chat-msgs{display:flex;flex-direction:column;gap:8px;height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b2) transparent;padding:4px;margin-bottom:12px;}
+.chat-msgs::-webkit-scrollbar{width:3px;}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+.chat-msg{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:10px 12px;animation:fadeUp 0.2s ease both;}
+.chat-msg.mine{border-color:rgba(56,189,248,0.2);background:rgba(56,189,248,0.04);}
+.chat-msg-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.chat-msg-user{font-size:9px;color:var(--comm);font-weight:700;}
+.chat-pfp{width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--b2);}
+.chat-pfp-placeholder{width:26px;height:26px;border-radius:50%;background:var(--b2);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700;color:var(--muted);}
+.chat-msg.mine .chat-msg-user{color:var(--comm2);}
+.chat-msg-time{font-size:7px;color:var(--muted);}
+.chat-msg-text{font-size:11px;line-height:1.5;word-break:break-word;}
+.chat-send-row{display:flex;gap:8px;}
+.chat-send-inp{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;outline:none;transition:border-color 0.2s;}
+.chat-send-inp:focus{border-color:var(--comm);}
+.chat-send-inp::placeholder{color:var(--dim);font-size:10px;}
+.btn-chat-send{background:var(--comm);border:none;border-radius:10px;padding:10px 14px;color:var(--bg);font-size:16px;cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:440px;max-width:100%;background:rgba(7,8,15,0.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--b1);padding:10px 8px 24px;z-index:100;display:flex;justify-content:space-around;}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:7px;cursor:pointer;transition:color 0.2s;padding:4px 8px;}
+.bnav-btn .ico{font-size:17px;}
+.bnav-btn.active{color:var(--gold);}
+.bnav-btn:nth-child(4).active{color:var(--mentor);}
+.bnav-btn:nth-child(5).active{color:var(--comm);}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s3);border:1px solid var(--b2);border-radius:8px;padding:9px 18px;font-size:11px;color:var(--text);opacity:0;transition:all 0.25s;z-index:200;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+.modal-bg.show{opacity:1;pointer-events:all;}
+.modal{background:var(--s2);border:1px solid var(--b2);border-radius:16px 16px 0 0;padding:24px 20px 40px;width:100%;max-width:440px;transform:translateY(16px);transition:transform 0.25s;}
+.modal-bg.show .modal{transform:translateY(0);}
+.modal-title{font-family:'Clash Display',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px;}
+.modal-inp{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:13px 14px;color:var(--text);font-family:'Space Mono',monospace;font-size:16px;outline:none;margin-bottom:12px;}
+.modal-inp:focus{border-color:var(--gold);}
+.modal-btns{display:flex;gap:8px;}
+.btn-confirm{flex:1;background:var(--gold);border:none;border-radius:8px;padding:12px;color:var(--bg);font-family:'Clash Display',sans-serif;font-weight:700;font-size:13px;cursor:pointer;}
+.btn-cancel{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:12px;color:var(--muted);font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;}
+.empty{text-align:center;padding:32px 20px;color:var(--muted);font-size:11px;line-height:1.8;}
+.empty-ico{font-size:28px;margin-bottom:10px;opacity:0.3;}
+.setup-warning{background:rgba(224,92,122,0.08);border:1px solid rgba(224,92,122,0.2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:10px;color:var(--red);line-height:1.6;}
+
+.mentor-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.mentor-tab{flex:1;padding:8px;background:none;border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;cursor:pointer;transition:all 0.2s;text-align:center;}
+.mentor-tab.active{background:var(--s3);border-color:var(--mentor);color:var(--mentor);}
+.mentor-section{display:none;}
+.mentor-section.active{display:block;}
+.msg-actions{display:flex;gap:6px;margin-top:4px;padding-left:36px;}
+.msg-action-btn{background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;cursor:pointer;padding:2px 6px;border-radius:4px;transition:all 0.2s;}
+.msg-action-btn:hover{color:var(--text);background:var(--b1);}
+.msg-bubble[contenteditable=true]{outline:1px solid var(--mentor);border-radius:4px 12px 12px 12px;cursor:text;}
+.saved-chats-list{display:flex;flex-direction:column;gap:8px;}
+.saved-chat-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all 0.2s;}
+.saved-chat-card:hover{border-color:var(--mentor);}
+.saved-chat-title{font-size:12px;font-weight:700;font-family:'Clash Display',sans-serif;margin-bottom:3px;}
+.saved-chat-meta{font-size:8px;color:var(--muted);letter-spacing:1px;}
+.saved-chat-del{float:right;background:none;border:none;color:var(--dim);cursor:pointer;font-size:15px;margin-top:-2px;}
+.saved-chat-del:hover{color:var(--red);}
+.priv-room-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.priv-room-card{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all 0.2s;}
+.priv-room-card:hover{border-color:var(--purple);}
+.priv-room-name{flex:1;font-size:12px;font-weight:700;font-family:'Clash Display',sans-serif;}
+.priv-room-badge{font-size:8px;color:var(--purple);background:rgba(155,114,212,0.1);border:1px solid rgba(155,114,212,0.2);border-radius:4px;padding:2px 6px;}
+.priv-chat-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px 14px;background:var(--s2);border:1px solid var(--b1);border-radius:10px;}
+.priv-chat-back{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0;}
+.priv-chat-back:hover{color:var(--text);}
+.priv-chat-title{flex:1;font-size:13px;font-weight:700;font-family:'Clash Display',sans-serif;}
+.priv-chat-area{display:flex;flex-direction:column;gap:6px;height:280px;overflow-y:auto;margin-bottom:8px;padding:4px 2px;scrollbar-width:thin;scrollbar-color:var(--b2) transparent;}
+/* Bubble messages */
+.priv-msg{max-width:75%;padding:8px 12px;border-radius:14px;animation:fadeUp 0.15s ease both;word-break:break-word;}
+.priv-msg.mine{align-self:flex-end;background:linear-gradient(135deg,var(--mentor),var(--purple));color:#fff;border-radius:14px 4px 14px 14px;}
+.priv-msg.other{align-self:flex-start;background:var(--s2);border:1px solid var(--b1);border-radius:4px 14px 14px 14px;}
+.priv-msg.ai-msg{align-self:center;background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.3);border-radius:14px;max-width:90%;text-align:center;}
+.priv-msg-user{font-size:8px;font-weight:700;margin-bottom:3px;opacity:0.7;}
+.priv-msg.mine .priv-msg-user{color:#fff;}
+.priv-msg.other .priv-msg-user{color:var(--purple);}
+.priv-msg.ai-msg .priv-msg-user{color:var(--mentor);}
+.priv-msg-text{font-size:11px;line-height:1.5;}
+.priv-msg.mine .priv-msg-text{color:#fff;}
+.priv-inp-row{display:flex;gap:8px;}
+/* Mentor panel in room */
+.room-mentor-panel{display:none;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:12px;margin-bottom:8px;}
+.room-mentor-panel.show{display:block;}
+.room-mentor-inp-row{display:flex;gap:6px;margin-top:8px;}
+.mentor-center-typing{display:flex;justify-content:center;gap:4px;padding:6px 0;}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">
+  <div class="loading-logo">GOAL<span>S</span></div>
+  <div class="spinner"></div>
+  <div class="loading-sub">// connecting</div>
+</div>
+
+<div class="auth" id="auth">
+  <div class="auth-logo">GOAL<span>S</span></div>
+  <div class="auth-tagline">// suited productions</div>
+  <div class="auth-box">
+    <div class="auth-label" id="auth-label">SIGN IN OR CREATE ACCOUNT</div>
+    <input class="auth-inp" id="auth-inp" placeholder="username" maxlength="20" autocomplete="off" autocorrect="off" spellcheck="false">
+    <input class="auth-inp" id="auth-pass" type="password" placeholder="password" maxlength="50" autocomplete="off">
+    <button class="auth-btn" id="auth-btn" onclick="handleAuth()">LET'S GO</button>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="auth-hint">username + password = your account<br>new username = creates new account</div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <div class="header">
+    <div class="header-row">
+      <div class="logo">GOAL<span>S</span></div>
+      <div class="user-area">
+        <div class="user-name" id="user-name-display">—</div>
+        <div class="admin-badge" id="admin-badge" style="display:none">⚡ ADMIN</div>
+        <button class="btn-out" onclick="signOut()">SIGN OUT</button>
+      </div>
+    </div>
+    <div class="header-sub">// suited productions companion</div>
+  </div>
+  <div class="sync"><div class="sync-dot" id="sync-dot"></div><div class="sync-txt" id="sync-txt">SYNCED</div></div>
+
+  <div class="nav">
+    <button class="nav-btn active" id="nav-budget" onclick="showPage('budget')">💰 Budget</button>
+    <button class="nav-btn" id="nav-savings" onclick="showPage('savings')">🎯 Savings</button>
+    <button class="nav-btn" id="nav-goals" onclick="showPage('goals')">✅ Goals</button>
+    <button class="nav-btn" id="nav-mentor" onclick="showPage('mentor')">🤖 Mentor</button>
+    <button class="nav-btn" id="nav-community" onclick="showPage('community')">🌐 Community</button>
+  </div>
+
+  <!-- BUDGET -->
+  <div class="page active" id="page-budget">
+    <div class="sec-label">// available funds</div>
+    <div class="bal-card">
+      <div class="bal-label">MY BUDGET</div>
+      <div class="bal-amt" id="bal-display"><em>$</em>0.00</div>
+      <div class="inp-row">
+        <input class="money-inp" id="bal-inp" type="number" placeholder="Enter your budget..." min="0" step="0.01">
+        <button class="btn-gold" onclick="setBudget()">SET</button>
+      </div>
+    </div>
+    <div class="sec-label">// what can you afford? (tap to buy)</div>
+    <div class="cat-row">
+      <button class="cat-btn active" data-c="all" onclick="filterAfford(this)">All</button>
+      <button class="cat-btn" data-c="gaming" onclick="filterAfford(this)">Gaming</button>
+      <button class="cat-btn" data-c="art" onclick="filterAfford(this)">Art</button>
+      <button class="cat-btn" data-c="pro" onclick="filterAfford(this)">Pro</button>
+      <button class="cat-btn" data-c="life" onclick="filterAfford(this)">Life</button>
+      <button class="cat-btn" data-c="custom" onclick="filterAfford(this)">Custom</button>
+    </div>
+    <div class="afford-grid" id="afford-grid"></div>
+    <div class="form-card">
+      <div class="form-title">// ADD CUSTOM ITEM</div>
+      <div class="form-row">
+        <input class="txt-inp" id="item-icon" placeholder="🎯" style="max-width:56px;text-align:center;font-size:18px;">
+        <input class="txt-inp" id="item-name" placeholder="Item name">
+      </div>
+      <div class="form-row">
+        <input class="money-inp" id="item-price" type="number" placeholder="Price $" min="0" step="0.01" style="flex:1">
+        <button class="btn-add" id="btn-ai-shop" onclick="aiFindShop()" style="background:rgba(155,114,212,0.15);border-color:var(--purple);color:var(--purple);">🔍 AI</button>
+        <button class="btn-add" onclick="addCustomItem()">+ ADD</button>
+      </div>
+      <div id="ai-shop-result" style="display:none;margin-top:8px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;font-size:10px;color:var(--muted);">Finding best link...</div>
+    </div>
+  </div>
+
+  <!-- SAVINGS -->
+  <div class="page" id="page-savings">
+    <div class="sec-label">// saving goals</div>
+    <div class="save-list" id="save-list"></div>
+    <div class="form-card">
+      <div class="form-title">// NEW SAVING GOAL</div>
+      <div class="form-row"><input class="txt-inp" id="save-name" placeholder="What are you saving for?"></div>
+      <div class="form-row">
+        <input class="money-inp" id="save-target" type="number" placeholder="Target $" min="1" style="flex:1">
+        <input class="money-inp" id="save-saved" type="number" placeholder="Saved $" min="0" style="flex:1">
+        <button class="btn-add" onclick="addSaving()">ADD</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOALS -->
+  <div class="page" id="page-goals">
+    <div class="stats" id="stats"></div>
+    <div id="tut-container"></div>
+    <div class="filter-row">
+      <button class="filter-btn active" data-f="all" onclick="filterGoals(this)">All</button>
+      <button class="filter-btn" data-f="gamedev" onclick="filterGoals(this)">Game Dev</button>
+      <button class="filter-btn" data-f="art" onclick="filterGoals(this)">Art</button>
+      <button class="filter-btn" data-f="career" onclick="filterGoals(this)">Career</button>
+      <button class="filter-btn" data-f="finance" onclick="filterGoals(this)">Finance</button>
+      <button class="filter-btn" data-f="personal" onclick="filterGoals(this)">Personal</button>
+      <button class="filter-btn" data-f="learning" onclick="filterGoals(this)">Learning</button>
+    </div>
+    <div class="goals-list" id="goals-list"></div>
+    <div class="form-card">
+      <div class="form-title">// NEW GOAL</div>
+      <div class="form-row"><input class="txt-inp" id="goal-name" placeholder="What do you want to achieve?"></div>
+      <div class="form-row">
+        <select class="txt-inp" id="goal-cat" style="flex:1">
+          <option value="gamedev">🎮 Game Dev</option>
+          <option value="art">🎨 Art & Design</option>
+          <option value="career">💼 Career & Work</option>
+          <option value="finance">💰 Finance</option>
+          <option value="personal">⚡ Personal</option>
+          <option value="learning">📚 Learning</option>
+        </select>
+        <button class="btn-add" onclick="addGoal()">ADD</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MENTOR -->
+  <div class="page" id="page-mentor">
+    <div class="mentor-header">
+      <div class="mentor-avatar">🤖</div>
+      <div class="mentor-info">
+        <div class="mentor-name">MENTOR AI</div>
+        <div class="mentor-status">// powered by groq · always online</div>
+      </div>
+    </div>
+    <div class="mentor-tabs">
+      <button class="mentor-tab active" onclick="switchMentorTab('chat')">💬 Chat</button>
+      <button class="mentor-tab" onclick="switchMentorTab('saved')">💾 Saved</button>
+      <button class="mentor-tab" onclick="switchMentorTab('collab')">🔒 Private</button>
+    </div>
+
+    <!-- CHAT TAB -->
+    <div class="mentor-section active" id="msec-chat">
+      <div class="quick-prompts">
+        <button class="quick-btn" onclick="quickPrompt('Save faster tips')">💰 Save faster</button>
+        <button class="quick-btn" onclick="quickPrompt('Review my budget')">📊 Budget review</button>
+        <button class="quick-btn" onclick="quickPrompt('What should I focus on?')">🎯 Priority</button>
+        <button class="quick-btn" onclick="quickPrompt('Money tips for my age')">💡 Money tips</button>
+      </div>
+      <div class="chat-area" id="chat-area">
+        <div class="msg ai">
+          <div class="msg-icon">🤖</div>
+          <div class="msg-bubble">Hey! I'm your Mentor AI — I can see your budget, savings and goals. Ask me anything! 👋</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <button class="btn-add" onclick="saveChat()" style="font-size:10px;padding:7px 12px;">💾 Save Chat</button>
+        <button class="btn-add" onclick="newChat()" style="font-size:10px;padding:7px 12px;background:rgba(167,139,250,0.1);border-color:var(--mentor);color:var(--mentor);">✨ New Chat</button>
+      </div>
+      <img id="chat-img-preview" class="img-preview" src="" alt="preview">
+      <div class="chat-inp-row">
+        <button class="btn-img" onclick="document.getElementById('chat-img-input').click()">🖼️</button>
+        <input type="file" id="chat-img-input" accept="image/*" style="display:none" onchange="previewChatImg(this)">
+        <input class="chat-inp" id="chat-inp" placeholder="Ask your mentor anything..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}">
+        <button class="btn-send" id="btn-send" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+
+    <!-- SAVED TAB -->
+    <div class="mentor-section" id="msec-saved">
+      <div class="sec-label">// saved conversations</div>
+      <div class="saved-chats-list" id="saved-chats-list">
+        <div class="empty"><div class="empty-ico">💾</div>No saved chats yet.</div>
+      </div>
+    </div>
+
+    <!-- PRIVATE ROOMS TAB -->
+    <div class="mentor-section" id="msec-collab">
+      <div id="collab-rooms-view">
+        <div class="sec-label">// private rooms</div>
+        <div class="priv-room-list" id="priv-room-list">
+          <div class="empty"><div class="empty-ico">🔒</div>No rooms yet — create one!</div>
+        </div>
+        <div class="form-card">
+          <div class="form-title">// NEW GROUP ROOM</div>
+          <div class="form-row" style="margin-bottom:6px;">
+            <input class="txt-inp" id="priv-room-name-inp" placeholder="Room name (e.g. Squad Goals)" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="form-row">
+            <input class="txt-inp" id="priv-friend-inp" placeholder="Usernames (comma separated)" autocomplete="off" spellcheck="false">
+            <button class="btn-add" onclick="createPrivRoom()">CREATE</button>
+          </div>
+        </div>
+      </div>
+      <div id="collab-chat-view" style="display:none;">
+        <div class="priv-chat-header">
+          <button class="priv-chat-back" onclick="showRoomsView()">←</button>
+          <div class="priv-chat-title" id="priv-chat-title">Private Room</div>
+          <button class="btn-add" onclick="toggleRoomMentor()" id="btn-room-mentor" style="font-size:9px;padding:4px 10px;background:rgba(167,139,250,0.1);border-color:var(--mentor);color:var(--mentor);">🤖 Mentor</button>
+        </div>
+        <div class="priv-chat-area" id="priv-chat-area"></div>
+        <!-- Mentor panel -->
+        <div class="room-mentor-panel" id="room-mentor-panel">
+          <div style="font-size:9px;color:var(--mentor);letter-spacing:2px;margin-bottom:6px;">// MENTOR AI HISTORY</div>
+          <div id="room-mentor-history" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:8px;scrollbar-width:thin;scrollbar-color:var(--b2) transparent;"></div>
+          <div id="room-mentor-reply" style="font-size:11px;line-height:1.5;color:var(--mentor);min-height:0;"></div>
+          <div class="room-mentor-inp-row">
+            <input class="chat-send-inp" id="room-mentor-inp" placeholder="Ask mentor something..." maxlength="300" onkeydown="if(event.key==='Enter')askMentorInRoom()">
+            <button class="btn-chat-send" onclick="askMentorInRoom()" style="background:linear-gradient(135deg,var(--mentor),var(--purple));">➤</button>
+          </div>
+        </div>
+        <img id="priv-img-preview" class="img-preview" src="" alt="preview">
+        <div class="priv-inp-row">
+          <button class="btn-img" onclick="document.getElementById('priv-img-input').click()">🖼️</button>
+          <input type="file" id="priv-img-input" accept="image/*" style="display:none" onchange="previewPrivImg(this)">
+          <input class="chat-send-inp" id="priv-chat-inp" placeholder="Message..." maxlength="300" onkeydown="if(event.key==='Enter')sendPrivMsg()">
+          <button class="btn-chat-send" onclick="sendPrivMsg()" style="background:var(--purple);">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div class="page" id="page-community">
+    <div class="comm-tabs">
+      <button class="comm-tab active" id="tab-feed" onclick="switchComm('feed')">📣 Feed</button>
+      <button class="comm-tab" id="tab-chat" onclick="switchComm('chat')">💬 Live Chat</button>
+    </div>
+    <div class="comm-section active" id="comm-feed">
+      <div class="feed-post-box">
+        <div class="feed-post-title">// SHARE YOUR PROGRESS</div>
+        <textarea class="feed-textarea" id="feed-text" placeholder="Share a win, update or motivation... (max 280 chars)"></textarea>
+        <div class="feed-post-row">
+          <select class="feed-goal-sel" id="feed-goal-sel"><option value="">No goal tag</option></select>
+          <button class="btn-post" onclick="postFeed()">POST</button>
+        </div>
+      </div>
+      <div class="sec-label">// community posts</div>
+      <div class="feed-list" id="feed-list"></div>
+    </div>
+    <div class="comm-section" id="comm-chat">
+      <div class="live-header">
+        <div class="live-dot"></div>
+        <div class="live-txt">LIVE CHAT</div>
+      </div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-send-row">
+        <input class="chat-send-inp" id="chat-send-inp" placeholder="Say something..." maxlength="200" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn-chat-send" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-nav" id="bottom-nav" style="display:none">
+  <button class="bnav-btn active" id="bnav-budget" onclick="showPage('budget')"><span class="ico">💰</span>BUDGET</button>
+  <button class="bnav-btn" id="bnav-savings" onclick="showPage('savings')"><span class="ico">🎯</span>SAVINGS</button>
+  <button class="bnav-btn" id="bnav-goals" onclick="showPage('goals')"><span class="ico">✅</span>GOALS</button>
+  <button class="bnav-btn" id="bnav-mentor" onclick="showPage('mentor')"><span class="ico">🤖</span>MENTOR</button>
+  <button class="bnav-btn" id="bnav-community" onclick="showPage('community')"><span class="ico">🌐</span>COMM</button>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Add to savings</div>
+    <input class="modal-inp" id="modal-inp" type="number" placeholder="Amount $" min="0.01" step="0.01">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="hideModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmAdd()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GROQ_KEY="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";
+const EXA_KEY="f917ec77-653e-44de-b0a3-ed97a29ec2f5";
+async function groqFetch(messages,useSearch=false){
+  if(useSearch){
+    const lastUser=messages.filter(m=>m.role==='user').pop();
+    const input=typeof lastUser.content==='string'?lastUser.content:(lastUser.content.find(c=>c.type==='text')||{text:''}).text;
+    const sysMsg=messages.find(m=>m.role==='system');
+    // Step 1: Search with Exa MCP via Responses API
+    const searchBody={
+      model:"meta-llama/llama-4-scout-17b-16e-instruct",
+      input:input,
+      instructions:(sysMsg?sysMsg.content+'\n':'')+"Use the Exa MCP search tools to find relevant web pages. Extract any image URLs you find. When calling web_search_exa: omit category, pass numResults as number 5, pass contextMaxCharacters as number 2000, no other optional params.",
+      tools:[{type:"mcp",server_label:"exa",server_url:"https://mcp.exa.ai/mcp?exaApiKey="+EXA_KEY,require_approval:"never"}]
+    };
+    const searchRes=await fetch("https://api.groq.com/openai/v1/responses",{
+      method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+GROQ_KEY},
+      body:JSON.stringify(searchBody)
+    });
+    const searchData=await searchRes.json();
+    let searchText='';
+    let imageUrls=[];
+    if(searchData.output){
+      const textItem=searchData.output.find(o=>o.type==='message');
+      if(textItem&&textItem.content){
+        const tc=textItem.content.find(c=>c.type==='output_text');
+        if(tc)searchText=tc.text;
+      }
+      // Extract image URLs from tool results
+      searchData.output.forEach(function(o){
+        if(o.type==='tool_result'||o.type==='mcp_call'){
+          const str=JSON.stringify(o);
+          const matches=str.match(/https?:\/\/[^"'\s]+\.(?:jpg|jpeg|png|gif|webp)[^"'\s]*/gi)||[];
+          imageUrls=imageUrls.concat(matches.slice(0,3));
+        }
+      });
+    }
+    if(searchData.error&&!searchText)return {choices:[{message:{content:'Error: '+searchData.error.message}}]};
+    // Step 2: If images found, pass them to vision model for analysis
+    if(imageUrls.length>0){
+      const visionContent=[
+        {type:'text',text:input+'\n\nSearch results:\n'+searchText+'\n\nI also found these images from the search results. Please describe what you see and answer the question:'},
+        ...imageUrls.map(url=>({type:'image_url',image_url:{url}}))
+      ];
+      const visionBody={model:"meta-llama/llama-4-scout-17b-16e-instruct",max_tokens:4096,messages:[
+        ...(sysMsg?[{role:'system',content:sysMsg.content}]:[]),
+        {role:'user',content:visionContent}
+      ]};
+      const visionRes=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+        method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+GROQ_KEY},
+        body:JSON.stringify(visionBody)
+      });
+      return visionRes.json();
+    }
+    // No images — return text search result
+    return {choices:[{message:{content:searchText||'No results found'}}]};
+  }
+  // Normal chat completions
+  const body={model:"meta-llama/llama-4-scout-17b-16e-instruct",max_tokens:4096,messages};
+  const res=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+    method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+GROQ_KEY},
+    body:JSON.stringify(body)
+  });
+  return res.json();
+}
+const{createClient}=supabase;
+const sb=createClient(
+  'https://ksfhagyblsrlokjnyrob.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzZmhhZ3libHNybG9ram55cm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NjE2OTksImV4cCI6MjA4NzIzNzY5OX0.GEk3TLzQwjYAVEL3eIBJzw6YQLOz8FtZy__iMrsCubs'
+);
+
+const ADMIN='mebotcoder';
+let uid=null,username='',isAdmin=false;
+let budget=0,savings=[],goals=[],customItems=[];
+let goalFilter='all',affordFilter='all',modalSavingId=null;
+let chatHistory=[],commTab='feed',savedChats=[],privRooms=[],currentRoom=null,privMsgs=[];
+let chatSub=null,feedSub=null;
+let feedPosts=[],liveMsgs=[];
+let commInited=false;
+
+const presets=[
+  {name:'Minecraft',price:29.99,icon:'⛏️',cat:'gaming',link:'https://www.amazon.com/s?k=minecraft'},
+  {name:'AAA Game',price:69.99,icon:'🔥',cat:'gaming',link:'https://www.amazon.com/s?k=ps5+video+games'},
+  {name:'Gaming Headset',price:49.99,icon:'🎧',cat:'gaming',link:'https://www.amazon.com/s?k=gaming+headset'},
+  {name:'Controller',price:59.99,icon:'🕹️',cat:'gaming',link:'https://www.amazon.com/s?k=xbox+wireless+controller'},
+  {name:'Gaming Mouse',price:39.99,icon:'🖱️',cat:'gaming',link:'https://www.amazon.com/s?k=gaming+mouse'},
+  {name:'Webcam HD',price:59.99,icon:'📷',cat:'gaming',link:'https://www.amazon.com/s?k=hd+webcam'},
+  {name:'Procreate',price:12.99,icon:'🎨',cat:'art',link:'https://apps.apple.com/app/procreate/id425073498'},
+  {name:'Drawing Tablet',price:79.99,icon:'✏️',cat:'art',link:'https://www.amazon.com/s?k=wacom+drawing+tablet'},
+  {name:'Adobe CC',price:54.99,icon:'🅰️',cat:'art',link:'https://www.adobe.com/creativecloud/plans.html'},
+  {name:'Sketchbook Pro',price:24.99,icon:'📓',cat:'art',link:'https://www.amazon.com/s?k=sketchbook+pro+app'},
+  {name:'Notion Pro',price:16,icon:'📋',cat:'pro',link:'https://www.notion.so/pricing'},
+  {name:'Udemy Course',price:29.99,icon:'🎓',cat:'pro',link:'https://www.udemy.com'},
+  {name:'Domain Name',price:12,icon:'🌐',cat:'pro',link:'https://www.namecheap.com'},
+  {name:'NeoStack Plugin',price:109.99,icon:'🎮',cat:'pro',link:'https://neostack.dev'},
+  {name:'Surface Laptop Studio',price:1599,icon:'💻',cat:'pro',link:'https://www.microsoft.com/en-us/surface/devices/surface-laptop-studio-2'},
+  {name:'Spotify Premium',price:11.99,icon:'🎵',cat:'life',link:'https://www.spotify.com/premium'},
+  {name:'Netflix',price:15.99,icon:'📺',cat:'life',link:'https://www.netflix.com'},
+  {name:'Dev Book',price:14.99,icon:'📖',cat:'life',link:'https://www.amazon.com/s?k=programming+books+beginners'},
+  {name:'Coffee Month',price:30,icon:'☕',cat:'life',link:'https://www.amazon.com/s?k=coffee+beans'},
+];
+
+const tutorials={
+  gamedev:[
+    {t:'Unreal Engine 5 Full Beginners Course',s:'YouTube · Unreal Sensei',u:'https://www.youtube.com/watch?v=k-zMkzmduqI'},
+    {t:'Make A Game In Unreal Engine 5',s:'YouTube · Matt Aspland',u:'https://www.youtube.com/watch?v=ITCWa9QBMoQ'},
+    {t:'Blender for Game Dev — Complete',s:'YouTube · Grant Abbitt',u:'https://www.youtube.com/watch?v=1jHUY3qoBu8'},
+    {t:'Unreal Engine 5 Blueprint Course',s:'YouTube · Ryan Laley',u:'https://www.youtube.com/watch?v=W0brCeJNMqk'},
+  ],
+  art:[
+    {t:'Procreate for Beginners Full Tutorial',s:'YouTube · Bardot Brush',u:'https://www.youtube.com/watch?v=A6-bDiS1GVA'},
+    {t:'Blender Beginner Donut Tutorial',s:'YouTube · Blender Guru',u:'https://www.youtube.com/watch?v=nIoXOplUvAw'},
+    {t:'Character Design for Games',s:'YouTube · Ctrl+Paint',u:'https://www.ctrlpaint.com/library'},
+    {t:'Pixel Art for Beginners',s:'YouTube · Saultoons',u:'https://www.youtube.com/watch?v=lfR7Qj04-UA'},
+  ],
+  career:[
+    {t:'How To Get Your First Dev Job',s:'YouTube · Fireship',u:'https://www.youtube.com/watch?v=FKgHeHKtF7I'},
+    {t:'How to Publish Your First Indie Game',s:'YouTube · Thomas Brush',u:'https://www.youtube.com/watch?v=Z4jSAdWCerQ'},
+    {t:'Build a Developer Portfolio',s:'YouTube · Kevin Powell',u:'https://www.youtube.com/watch?v=_xkSvufmjEs'},
+    {t:'Freelancing as a Developer Guide',s:'YouTube · Traversy Media',u:'https://www.youtube.com/watch?v=VRdY_-X6PN4'},
+  ],
+  finance:[
+    {t:'How Teens Can Make Money Online',s:'YouTube · Ali Abdaal',u:'https://www.youtube.com/watch?v=TbQ0lq-SBFU'},
+    {t:'Make Money as an Indie Game Dev',s:'YouTube · Thomas Brush',u:'https://www.youtube.com/watch?v=Jc-IjLBEJNg'},
+    {t:'Budgeting for Beginners',s:'YouTube · Graham Stephan',u:'https://www.youtube.com/watch?v=HQzoZfc3GwQ'},
+    {t:'Passive Income for Developers',s:'YouTube · Florin Pop',u:'https://www.youtube.com/watch?v=M3j1RmBwMEo'},
+  ],
+  personal:[
+    {t:'Study With Me — 4 Hour Focus Session',s:'YouTube · The Strive Studies',u:'https://www.youtube.com/watch?v=1fBeunglfXw'},
+    {t:'How To Build Habits That Stick',s:'YouTube · James Clear',u:'https://www.youtube.com/watch?v=PZ7lDrwYdZc'},
+    {t:'Time Management for Students',s:'YouTube · Mike and Matty',u:'https://www.youtube.com/watch?v=oTugjssqOT0'},
+    {t:'How To Stay Motivated Long Term',s:'YouTube · Matt D\'Avella',u:'https://www.youtube.com/watch?v=Lp7E973zozc'},
+  ],
+  learning:[
+    {t:'Learn Python in 1 Hour',s:'YouTube · Programming with Mosh',u:'https://www.youtube.com/watch?v=kqtD5dpn9C8'},
+    {t:'JavaScript Full Course for Beginners',s:'YouTube · freeCodeCamp',u:'https://www.youtube.com/watch?v=PkZNo7MFNFg'},
+    {t:'HTML & CSS Full Course',s:'YouTube · Dave Gray',u:'https://www.youtube.com/watch?v=mU6anWqZJcc'},
+    {t:'C++ for Unreal Engine Beginners',s:'YouTube · Caleb Curry',u:'https://www.youtube.com/watch?v=18c3MTX0PK0'},
+  ],
+};
+
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+function setSyncing(v){document.getElementById('sync-dot').classList.toggle('syncing',v);document.getElementById('sync-txt').textContent=v?'SYNCING...':'SYNCED';}
+function timeAgo(ts){const s=Math.floor((Date.now()-new Date(ts))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+
+// AUTH
+document.getElementById('auth-inp').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('auth-pass').focus();});
+document.getElementById('auth-pass').addEventListener('keydown',function(e){if(e.key==='Enter')handleAuth();});
+async function handleAuth(){
+  const raw=document.getElementById('auth-inp').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const err=document.getElementById('auth-err');err.textContent='';
+  if(!raw||raw.length<2)return err.textContent='username must be 2+ characters';
+  if(!/^[a-zA-Z0-9_]+$/.test(raw))return err.textContent='letters, numbers, _ only';
+  if(!pass||pass.length<4)return err.textContent='password must be 4+ characters';
+  username=raw.toLowerCase();isAdmin=(username===ADMIN);
+  const email=username+'@goals.suitedprod.app';
+  const oldPass='sp_'+username+'_g0als_x7k';
+  document.getElementById('auth-btn').textContent='...';
+
+  // Try sign in with entered password
+  const{data:si,error:sie}=await sb.auth.signInWithPassword({email,password:pass});
+  if(!sie&&si.session){uid=si.session.user.id;showApp();return;}
+
+  // Try old password (existing account migration)
+  const{data:si2,error:sie2}=await sb.auth.signInWithPassword({email,password:oldPass});
+  if(!sie2&&si2.session){
+    uid=si2.session.user.id;
+    // Update to new password
+    await sb.auth.updateUser({password:pass});
+    showApp();return;
+  }
+
+  // Create new account
+  const{data:su,error:sue}=await sb.auth.signUp({email,password:pass,options:{data:{username}}});
+  if(sue){err.textContent=sue.message;document.getElementById('auth-btn').textContent="LET'S GO";return;}
+  if(su.session){uid=su.session.user.id;showApp();}
+  else{err.style.color='var(--mentor)';err.textContent='check supabase email confirmation is off';document.getElementById('auth-btn').textContent="LET'S GO";}
+}
+
+async function signOut(){
+  if(chatSub)chatSub.unsubscribe();
+  if(feedSub)feedSub.unsubscribe();
+  await sb.auth.signOut();
+  document.getElementById('app').style.display='none';
+  document.getElementById('bottom-nav').style.display='none';
+  document.getElementById('auth').classList.add('show');
+}
+
+// DATA
+async function loadData(){
+  setSyncing(true);
+  const[bR,sR,gR,iR]=await Promise.all([
+    sb.from('budget').select('*').eq('user_id',uid).maybeSingle(),
+    sb.from('savings').select('*').eq('user_id',uid).order('created_at'),
+    sb.from('goals').select('*').eq('user_id',uid).order('created_at'),
+    sb.from('custom_items').select('*').eq('user_id',uid).order('created_at'),
+  ]);
+  budget=bR.data?.amount||0;savings=sR.data||[];goals=gR.data||[];customItems=iR.data||[];
+  setSyncing(false);renderAll();
+}
+
+async function upsertBudget(a){setSyncing(true);await sb.from('budget').upsert({user_id:uid,amount:a},{onConflict:'user_id'});setSyncing(false);}
+async function ins(table,data){setSyncing(true);const{data:r}=await sb.from(table).insert({...data,user_id:uid}).select().single();setSyncing(false);return r;}
+async function upd(table,id,data){setSyncing(true);await sb.from(table).update(data).eq('id',id).eq('user_id',uid);setSyncing(false);}
+async function del(table,id){setSyncing(true);await sb.from(table).delete().eq('id',id).eq('user_id',uid);setSyncing(false);}
+
+// NAV
+function showPage(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn,.bnav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p).classList.add('active');
+  document.getElementById('bnav-'+p).classList.add('active');
+  if(p==='community'&&!commInited){commInited=true;initCommunity();}
+}
+
+// BUDGET
+async function setBudget(){
+  const v=parseFloat(document.getElementById('bal-inp').value);
+  if(isNaN(v)||v<0)return showToast('Enter a valid amount');
+  budget=v;await upsertBudget(budget);renderBudget();
+  document.getElementById('bal-inp').value='';showToast('Budget updated ✓');
+}
+function filterAfford(btn){document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');affordFilter=btn.dataset.c;renderAffordGrid();}
+function renderBudget(){document.getElementById('bal-display').innerHTML=`<em>$</em>${budget.toFixed(2)}`;renderAffordGrid();}
+function renderAffordGrid(){
+  const grid=document.getElementById('afford-grid');
+  const all=[...presets,...customItems.map(i=>({...i,cat:'custom'}))];
+  const filtered=affordFilter==='all'?all:all.filter(i=>i.cat===affordFilter);
+  if(!filtered.length){grid.innerHTML='<div class="empty" style="grid-column:span 2"><div class="empty-ico">📦</div>No items</div>';return;}
+  grid.innerHTML='';
+  filtered.forEach(item=>{
+    const can=budget>=item.price,isC=item.cat==='custom';
+    const card=document.createElement('div');card.className=`afford-card ${can?'yes':'no'} ${isC?'custom':''}`;
+    if(item.link)card.onclick=()=>window.open(item.link,'_blank');
+    card.innerHTML=`${item.link?'<div class="buy-badge">BUY ↗</div>':(can?'<div class="green-dot"></div>':'')}<div class="af-icon">${item.icon||'📦'}</div><div class="af-name">${item.name}</div><div class="af-price">$${parseFloat(item.price).toFixed(2)}</div>${isC?`<button class="af-del" onclick="event.stopPropagation();delCustom('${item.id}')">×</button>`:''}`;
+    grid.appendChild(card);
+  });
+}
+async function aiFindShop(){
+  const name=document.getElementById('item-name').value.trim();
+  if(!name)return showToast('Enter item name first');
+  const btn=document.getElementById('btn-ai-shop');
+  const result=document.getElementById('ai-shop-result');
+  btn.textContent='...';result.style.display='block';result.textContent='🔍 Finding best link...';
+  try{
+    const data=await groqFetch([
+        {role:'system',content:'You find the best shopping link for products. Reply ONLY with a JSON object with keys: url (use Amazon search URL format: https://www.amazon.com/s?k=search+terms with product name as search terms), price (estimated USD number). No markdown, no extra text.'},
+        {role:'user',content:'Best buy link for: '+name}
+      ]);
+    const raw=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'{}';
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const obj=JSON.parse(clean);
+    window._aiShopLink=obj.url?obj.url:('https://www.amazon.in/s?k='+encodeURIComponent(obj.search||name));
+    if(obj.price&&!document.getElementById('item-price').value)document.getElementById('item-price').value=obj.price;
+    result.innerHTML='<a href="'+obj.url+'" target="_blank" style="color:var(--gold);">🛒 '+obj.url.substring(0,50)+'...</a>';
+  }catch(e){result.textContent='Could not find link — add manually';}
+  btn.textContent='🔍 AI';
+}
+async function addCustomItem(){
+  const icon=document.getElementById('item-icon').value.trim()||'📦';
+  const name=document.getElementById('item-name').value.trim();
+  const price=parseFloat(document.getElementById('item-price').value);
+  if(!name||isNaN(price)||price<0)return showToast('Fill in name and price');
+  const link=window._aiShopLink||'';
+  const r=await ins('custom_items',{name,price,icon,link});
+  if(r)customItems.push(r);renderAffordGrid();
+  document.getElementById('item-icon').value='';document.getElementById('item-name').value='';document.getElementById('item-price').value='';
+  document.getElementById('ai-shop-result').style.display='none';
+  window._aiShopLink='';
+  showToast('Item added ✓');
+}
+async function delCustom(id){await del('custom_items',id);customItems=customItems.filter(x=>x.id!==id);renderAffordGrid();}
+
+// SAVINGS
+async function addSaving(){
+  const name=document.getElementById('save-name').value.trim();
+  const target=parseFloat(document.getElementById('save-target').value);
+  const saved=parseFloat(document.getElementById('save-saved').value)||0;
+  if(!name||isNaN(target)||target<=0)return showToast('Fill in name and target');
+  const r=await ins('savings',{name,target,saved});
+  if(r)savings.push(r);renderSavings();
+  document.getElementById('save-name').value='';document.getElementById('save-target').value='';document.getElementById('save-saved').value='';
+  showToast('Saving goal added ✓');
+}
+function showAddModal(id){
+  modalSavingId=id;const s=savings.find(x=>x.id===id);
+  document.getElementById('modal-title').textContent=`Add to "${s.name}"`;
+  document.getElementById('modal-inp').value='';
+  document.getElementById('modal-bg').classList.add('show');
+  setTimeout(()=>document.getElementById('modal-inp').focus(),100);
+}
+function hideModal(){document.getElementById('modal-bg').classList.remove('show');modalSavingId=null;}
+function closeModal(e){if(e.target===document.getElementById('modal-bg'))hideModal();}
+async function confirmAdd(){
+  const amt=parseFloat(document.getElementById('modal-inp').value);
+  if(isNaN(amt)||amt<=0)return showToast('Enter a valid amount');
+  const s=savings.find(x=>x.id===modalSavingId);if(!s)return;
+  s.saved=Math.min(parseFloat(s.saved)+amt,parseFloat(s.target));
+  await upd('savings',s.id,{saved:s.saved});renderSavings();hideModal();
+  if(s.saved>=s.target)showToast('🎉 Goal reached!');else showToast(`+$${amt.toFixed(2)} saved ✓`);
+}
+async function delSaving(id){await del('savings',id);savings=savings.filter(x=>x.id!==id);renderSavings();}
+function renderSavings(){
+  const list=document.getElementById('save-list');
+  if(!savings.length){list.innerHTML='<div class="empty"><div class="empty-ico">🎯</div>No saving goals yet.</div>';return;}
+  list.innerHTML='';
+  savings.forEach(s=>{
+    const pct=Math.min((parseFloat(s.saved)/parseFloat(s.target))*100,100);
+    const full=parseFloat(s.saved)>=parseFloat(s.target);
+    const card=document.createElement('div');card.className='save-card';
+    card.innerHTML=`<div class="save-top"><div class="save-name">${s.name}</div><div class="save-target">$${parseFloat(s.target).toFixed(2)}</div></div><div class="save-bar-bg"><div class="save-bar ${full?'done':''}" style="width:${pct}%"></div></div><div class="save-bot"><div class="save-prog">$${parseFloat(s.saved).toFixed(2)} — ${Math.round(pct)}%${full?' 🎉':''}</div><div class="save-acts">${!full?`<button class="btn-sm" onclick="showAddModal('${s.id}')">+ADD</button>`:''}<button class="btn-sm del" onclick="delSaving('${s.id}')">DEL</button></div></div>`;
+    list.appendChild(card);
+  });
+}
+
+// GOALS
+const catLabels={gamedev:'Game Dev',art:'Art',career:'Career',finance:'Finance',personal:'Personal',learning:'Learning'};
+const catClass={gamedev:'tg',art:'ta',career:'tc',finance:'tf',personal:'tp',learning:'tl'};
+async function addGoal(){
+  const name=document.getElementById('goal-name').value.trim();
+  const cat=document.getElementById('goal-cat').value;
+  if(!name)return showToast('Enter a goal first');
+  const r=await ins('goals',{name,cat,done:false});
+  if(r)goals.push(r);renderGoals();updateFeedSel();
+  document.getElementById('goal-name').value='';showToast('Goal added ✓');
+}
+async function toggleGoal(id){
+  const g=goals.find(x=>x.id===id);if(!g)return;
+  g.done=!g.done;await upd('goals',id,{done:g.done});renderGoals();
+  if(g.done)showToast('Completed! 🎉');
+}
+async function delGoal(id){await del('goals',id);goals=goals.filter(x=>x.id!==id);renderGoals();updateFeedSel();}
+function filterGoals(btn){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');goalFilter=btn.dataset.f;renderGoals();}
+async function aiCall(messages){
+  const data=await groqFetch(messages);
+  const raw=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'[]';
+  return raw.replace(/```json|```/g,'').trim();
+}
+async function showTuts(id){
+  const g=goals.find(x=>x.id===id);if(!g)return;
+  const presetTuts=tutorials[g.cat]||[];
+  const c=document.getElementById('tut-container');
+  c.innerHTML='<div class="tut-panel"><div class="tut-header"><div class="tut-title">// RESOURCES</div><button class="tut-close" onclick="document.getElementById(\'tut-container\').innerHTML=\'\'">×</button></div><div class="tut-for">📚 "'+g.name+'"</div><div id="tut-results" class="tut-list"><div style="font-size:9px;color:var(--muted);letter-spacing:1px;">🔍 Loading...</div></div><div id="shop-results"></div></div>';
+  c.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  // Load tutorials and shopping in parallel
+  const tutPromise = presetTuts.length
+    ? Promise.resolve(presetTuts.map(function(t){return '<a class="tut-item" href="'+t.u+'" target="_blank"><div class="tut-item-title">'+t.t+'</div><div class="tut-item-src">▶ '+t.s+'</div></a>';}).join(''))
+    : aiCall([
+        {role:'system',content:'Find YouTube tutorials. Reply ONLY a JSON array of 4 objects with keys: title, channel, url. No markdown, no extra text.'},
+        {role:'user',content:'Find 4 YouTube tutorials for: '+g.name}
+      ]).then(function(raw){
+        try{
+          const items=JSON.parse(raw);
+          return items.map(function(t){return '<a class="tut-item" href="'+t.url+'" target="_blank"><div class="tut-item-title">'+t.title+'</div><div class="tut-item-src">▶ '+t.channel+'</div></a>';}).join('');
+        }catch(e){return '<div class="empty">No tutorials found</div>';}
+      }).catch(function(){return '<div class="empty">Could not load tutorials</div>';});
+
+  const shopPromise = aiCall([
+    {role:'system',content:'Find 3 products to buy that help with this goal. Reply ONLY a JSON array of 3 objects with keys: name, price (USD string like "$29.99"), icon (1 emoji), url (use Amazon SEARCH url format: https://www.amazon.com/s?k=search+terms+here with the product name as search terms). No markdown, no extra text.'},
+    {role:'user',content:'Products to help with goal: '+g.name}
+  ]).then(function(raw){
+    try{
+      const items=JSON.parse(raw);
+      return items.map(function(s){var url='https://www.amazon.in/s?k='+encodeURIComponent(s.search||s.name);return '<a class="shop-item" href="'+url+'" target="_blank"><div class="shop-item-icon">'+s.icon+'</div><div class="shop-item-info"><div class="shop-item-name">'+s.name+'</div><div class="shop-item-price">'+s.price+'</div></div><div class="shop-item-arrow">↗</div></a>';}).join('');
+    }catch(e){return '';}
+  }).catch(function(){return '';});
+
+  const [tutHTML, shopHTML] = await Promise.all([tutPromise, shopPromise]);
+  const tutEl=document.getElementById('tut-results');
+  const shopEl=document.getElementById('shop-results');
+  if(tutEl)tutEl.innerHTML=tutHTML;
+  if(shopEl&&shopHTML)shopEl.innerHTML='<div class="shop-section"><div class="shop-label">🛒 GEAR UP</div>'+shopHTML+'</div>';
+}
+function renderStats(){
+  const total=goals.length,done=goals.filter(g=>g.done).length,pct=total?Math.round((done/total)*100):0;
+  document.getElementById('stats').innerHTML=`<div class="stat"><div class="stat-n">${total}</div><div class="stat-l">TOTAL</div></div><div class="stat"><div class="stat-n">${done}</div><div class="stat-l">DONE</div></div><div class="stat"><div class="stat-n">${pct}%</div><div class="stat-l">COMPLETE</div></div>`;
+}
+function renderGoals(){
+  renderStats();
+  const list=document.getElementById('goals-list');
+  const filtered=goalFilter==='all'?goals:goals.filter(g=>g.cat===goalFilter);
+  if(!filtered.length){list.innerHTML='<div class="empty"><div class="empty-ico">✅</div>No goals here yet.</div>';return;}
+  list.innerHTML='';
+  [...filtered].sort((a,b)=>a.done-b.done).forEach(g=>{
+    const card=document.createElement('div');card.className=`goal-card ${g.done?'done':''}`;
+    card.innerHTML=`<div class="goal-check ${g.done?'on':''}" onclick="toggleGoal('${g.id}')">${g.done?'✓':''}</div><div class="goal-info"><div class="goal-title">${g.name}</div><span class="goal-tag ${catClass[g.cat]}">${catLabels[g.cat]}</span></div><div class="goal-actions"><button class="goal-del" onclick="delGoal('${g.id}')">×</button><button class="btn-tut" onclick="showTuts('${g.id}')">📚 TUTORIALS</button></div>`;
+    list.appendChild(card);
+  });
+}
+
+// MENTOR
+// IMAGE UPLOAD HELPERS
+let chatImgData=null, privImgData=null;
+
+function previewChatImg(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    chatImgData={base64:e.target.result.split(',')[1],type:file.type};
+    const prev=document.getElementById('chat-img-preview');
+    prev.src=e.target.result;prev.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewPrivImg(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    privImgData={base64:e.target.result.split(',')[1],type:file.type};
+    const prev=document.getElementById('priv-img-preview');
+    prev.src=e.target.result;prev.classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearChatImg(){
+  chatImgData=null;
+  const prev=document.getElementById('chat-img-preview');
+  prev.src='';prev.classList.remove('show');
+  document.getElementById('chat-img-input').value='';
+}
+
+function clearPrivImg(){
+  privImgData=null;
+  const prev=document.getElementById('priv-img-preview');
+  prev.src='';prev.classList.remove('show');
+  document.getElementById('priv-img-input').value='';
+}
+
+function newChat(){
+  if(!confirm('Start a fresh chat? Current chat will be cleared.'))return;
+  chatHistory=[];
+  document.getElementById('chat-area').innerHTML='<div class="msg ai"><div class="msg-icon">🤖</div><div class="msg-bubble">Fresh start! I\'m your Mentor AI — ask me anything! 👋</div></div>';
+  showToast('New chat started ✨');
+}
+async function sendMessage(){
+  const inp=document.getElementById('chat-inp');
+  const msg=inp.value.trim();if(!msg)return;
+  inp.value='';
+  // Build message content — text only or multimodal with image
+  let userContent;
+  if(chatImgData){
+    userContent=[{type:'image_url',image_url:{url:'data:'+chatImgData.type+';base64,'+chatImgData.base64}},{type:'text',text:msg||'What is in this image?'}];
+    addMsg('user',(msg||'What is in this image?')+'<br><img src="data:'+chatImgData.type+';base64,'+chatImgData.base64+'" class="msg-img">','👤',true);
+    clearChatImg();
+  } else {
+    userContent=msg;
+    addMsg('user',msg,'👤');
+  }
+  chatHistory.push({role:'user',content:userContent});
+  document.getElementById('btn-send').disabled=true;
+  const typing=document.createElement('div');typing.className='msg ai';typing.id='typing';
+  typing.innerHTML='<div class="msg-icon">🤖</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  document.getElementById('chat-area').appendChild(typing);scrollChat();
+  try{
+    // Load relevant knowledge from Supabase
+    let knowledgeContext='';
+    try{
+      const{data:knowledgeRows}=await sb.from('knowledge').select('topic,content').order('created_at',{ascending:false}).limit(20);
+      if(knowledgeRows&&knowledgeRows.length){
+        const relevant=knowledgeRows.filter(k=>msg.toLowerCase().split(' ').some(w=>w.length>3&&k.topic.toLowerCase().includes(w)));
+        if(relevant.length)knowledgeContext='\n\nKnown info from memory:\n'+relevant.map(k=>`[${k.topic}]: ${k.content}`).join('\n');
+      }
+    }catch(e){}
+    const sysPrompt='You are Mentor AI — a smart, knowledgeable assistant in the Goals app by Suited Productions. You are talking to '+username+'. Their budget: $'+budget.toFixed(2)+'. Their goals: '+goals.map(function(g){return g.name+(g.done?'\u2713':'');}).join(', ')+'. You have access to real-time web search via Exa — USE IT to answer questions accurately. Never make up answers or say you cannot find info — search first and give the real answer. Be direct, fun and use emojis. You help with ANYTHING the user asks — goals, gaming, news, lore, prices, advice — not just finances.'+(knowledgeContext?'\n\nMemory: '+knowledgeContext:'');
+    const msgs=[{role:'system',content:sysPrompt},...chatHistory,{role:'user',content:msg}];
+    const noSearchKeywords=['hi','hello','hey','thanks','thank you','bye','budget','savings','save','goal','money','how much','remind'];
+    const isSimple=noSearchKeywords.some(k=>msg.toLowerCase().trim()===k||msg.length<15);
+    const needsSearch=!isSimple;
+    // Detect user corrections and save to knowledge
+    const correctionPatterns=['no ','wrong','actually','not true','incorrect','it\'s actually','it is actually','the real'];
+    const isCorrection=correctionPatterns.some(p=>msg.toLowerCase().startsWith(p));
+    if(isCorrection){
+      try{
+        await sb.from('knowledge').upsert({topic:msg.substring(0,60),content:msg,created_at:new Date().toISOString()},{onConflict:'topic'});
+      }catch(e){}
+    }
+    const data=await groqFetch(msgs,needsSearch);
+    const rawText=JSON.stringify(data);
+    console.log('Groq raw:',rawText.substring(0,500));
+    let reply='Connection issue, try again!';
+    try{
+      if(data.choices&&data.choices[0]){
+        const m=data.choices[0].message;
+        if(m&&m.content){reply=m.content;}
+        else if(m&&m.reasoning){reply=m.reasoning;}
+      } else if(data.error){reply='Error: '+data.error.message;}
+    }catch(e){reply='Parse error: '+rawText.substring(0,100);}
+    // Extract and save facts to Supabase knowledge base
+    try{
+      if(reply&&reply.length>50&&!reply.includes('Connection issue')&&!reply.includes('Error:')){
+        // Ask AI to extract key facts from the conversation
+        const factRes=await fetch("https://api.groq.com/openai/v1/chat/completions",{
+          method:"POST",
+          headers:{"Content-Type":"application/json","Authorization":"Bearer "+GROQ_KEY},
+          body:JSON.stringify({
+            model:"meta-llama/llama-4-scout-17b-16e-instruct",
+            max_tokens:500,
+            messages:[{
+              role:"user",
+              content:"Extract 1-3 concrete facts from this Q&A that would be useful to remember for future conversations. Return ONLY a JSON array of objects with keys: topic (short string) and fact (one sentence). If no clear facts exist return [].\n\nQ: "+msg+"\nA: "+reply
+            }]
+          })
+        });
+        const factData=await factRes.json();
+        const factText=(factData.choices&&factData.choices[0]&&factData.choices[0].message&&factData.choices[0].message.content)||'[]';
+        const facts=JSON.parse(factText.replace(/```json|```/g,'').trim());
+        if(Array.isArray(facts)&&facts.length){
+          for(const f of facts){
+            if(f.topic&&f.fact){
+              await sb.from('knowledge').upsert({topic:f.topic.substring(0,60),content:f.fact.substring(0,500),created_at:new Date().toISOString()},{onConflict:'topic'});
+            }
+          }
+        }
+      }
+    }catch(e){}
+    chatHistory.push({role:'assistant',content:reply});
+    document.getElementById('typing')?.remove();addMsg('ai',reply,'🤖');
+  }catch(e){document.getElementById('typing')?.remove();addMsg('ai',"Connection issue — try again! 🔄",'🤖');}
+  document.getElementById('btn-send').disabled=false;
+}
+function addMsg(role,text,icon){
+  const area=document.getElementById('chat-area');
+  const wrap=document.createElement('div');wrap.className='msg-wrap';
+  const div=document.createElement('div');div.className='msg '+(role==='ai'?'ai':'user');
+  const bubbleId='bubble-'+Date.now();
+  div.innerHTML='<div class="msg-icon">'+icon+'</div><div class="msg-bubble" id="'+bubbleId+'">'+(typeof text==='string'?text.replace(/\n/g,'<br>'):text)+'</div>';
+  wrap.appendChild(div);
+  if(role==='user'){
+    const acts=document.createElement('div');acts.className='msg-actions';acts.style.justifyContent='flex-end';
+    var ab=document.createElement('button');ab.className='msg-action-btn';ab.textContent='✏️';ab.title='Edit message';
+    ab.onclick=(function(bid){return function(){editBubble(bid);};})(bubbleId);
+    acts.appendChild(ab);
+    wrap.appendChild(acts);
+  }
+  area.appendChild(wrap);scrollChat();
+}
+function editBubble(id){
+  const el=document.getElementById(id);if(!el)return;
+  if(el.contentEditable==='true'){
+    el.contentEditable='false';
+    el.style.outline='';el.style.background='';
+    // update chatHistory with edited text - find by position among user messages
+    const allBubbles=Array.from(document.querySelectorAll('#chat-area .msg.user .msg-bubble'));
+    const idx=allBubbles.indexOf(el);
+    const userMsgs=chatHistory.filter(function(m){return m.role==='user';});
+    if(idx>=0&&userMsgs[idx]){userMsgs[idx].content=el.innerText;}
+    showToast('Message edited ✓');
+    // Mentor re-responds to edited message
+    const editedMsg=el.innerText.trim();
+    if(editedMsg)mentorReactToEdit(editedMsg);
+  }else{
+    el.contentEditable='true';
+    el.style.outline='1px solid var(--mentor)';
+    el.style.borderRadius='8px';
+    el.style.padding='2px 4px';
+    el.focus();
+    const range=document.createRange();range.selectNodeContents(el);range.collapse(false);
+    const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+  }
+}
+async function mentorReactToEdit(editedMsg){
+  const area=document.getElementById('chat-area');
+  // Remove last AI bubble and replace with typing
+  const allMsgs=area.querySelectorAll('.msg.ai');
+  const lastAI=allMsgs[allMsgs.length-1];
+  const typing=document.createElement('div');typing.className='msg ai';typing.id='typing-edit';
+  typing.innerHTML='<div class="msg-icon">🤖</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  if(lastAI)lastAI.replaceWith(typing); else area.appendChild(typing);
+  try{
+    const sysPrompt='You are Mentor AI in the Goals app. The user edited their message to: "'+editedMsg+'". Respond naturally to the updated message. Be concise and use emojis.';
+    const msgs=[{role:'system',content:sysPrompt},...chatHistory.slice(-6),{role:'user',content:editedMsg}];
+    const data=await groqFetch(msgs,false);
+    let reply='Could not respond to edit.';
+    if(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content){
+      reply=data.choices[0].message.content;
+    } else if(data.error){reply='Error: '+data.error.message;}
+    for(let i=chatHistory.length-1;i>=0;i--){
+      if(chatHistory[i].role==='assistant'){chatHistory[i].content=reply;break;}
+    }
+    document.getElementById('typing-edit')?.remove();
+    addMsg('ai',reply,'🤖');
+  }catch(e){document.getElementById('typing-edit')?.remove();addMsg('ai','Could not re-respond — try again','🤖');}
+}
+function scrollChat(){const a=document.getElementById('chat-area');if(a)a.scrollTop=a.scrollHeight;}
+function quickPrompt(msg){document.getElementById('chat-inp').value=msg;sendMessage();}
+function switchMentorTab(tab){
+  document.querySelectorAll('.mentor-tab').forEach(function(b,i){b.classList.toggle('active',['chat','saved','collab'][i]===tab);});
+  document.querySelectorAll('.mentor-section').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('msec-'+tab).classList.add('active');
+  if(tab==='saved')renderSavedChats();
+  if(tab==='collab')renderPrivRooms();
+}
+async function saveChat(){
+  const msgs=document.querySelectorAll('#chat-area .msg-bubble');
+  if(msgs.length<=1)return showToast('Nothing to save yet!');
+  const title=chatHistory[0]?chatHistory[0].content.substring(0,40):'Chat '+new Date().toLocaleDateString();
+  const entry={id:'chat_'+Date.now(),user_id:uid,title,messages:JSON.parse(JSON.stringify(chatHistory)),created_at:new Date().toISOString()};
+  const{error}=await sb.from('saved_chats').insert(entry);
+  if(error){showToast('Save failed: '+error.message);return;}
+  savedChats.unshift(entry);
+  showToast('Chat saved! 💾');renderSavedChats();
+}
+async function loadSavedChats(){
+  const{data}=await sb.from('saved_chats').select('*').eq('user_id',uid).order('created_at',{ascending:false});
+  savedChats=data||[];
+  renderSavedChats();
+}
+function renderSavedChats(){
+  const list=document.getElementById('saved-chats-list');
+  if(!savedChats.length){list.innerHTML='<div class="empty"><div class="empty-ico">💾</div>No saved chats yet.</div>';return;}
+  list.innerHTML='';
+  savedChats.forEach(function(c){
+    const card=document.createElement('div');card.className='saved-chat-card';
+    const date=c.created_at?new Date(c.created_at).toLocaleDateString():c.date||'';
+    const msgs=c.messages||c.history||[];
+    card.innerHTML=`<button class="saved-chat-del" onclick="event.stopPropagation();deleteSavedChat('${c.id}')">×</button><div class="saved-chat-title">${c.title}</div><div class="saved-chat-meta">${date} · ${msgs.length} messages</div>`;
+    card.onclick=function(){loadSavedChat(c);};
+    list.appendChild(card);
+  });
+}
+function loadSavedChat(c){
+  const msgs=c.messages||c.history||[];
+  chatHistory=JSON.parse(JSON.stringify(msgs));
+  const area=document.getElementById('chat-area');area.innerHTML='';
+  msgs.forEach(function(m){addMsg(m.role==='assistant'?'ai':'user',m.content,m.role==='assistant'?'🤖':'👤');});
+  switchMentorTab('chat');showToast('Chat loaded ✓');
+}
+async function deleteSavedChat(id){
+  await sb.from('saved_chats').delete().eq('id',id);
+  savedChats=savedChats.filter(function(c){return c.id!==id;});
+  renderSavedChats();
+}
+// PRIVATE ROOMS
+function renderPrivRooms(){
+  const list=document.getElementById('priv-room-list');
+  const myRooms=privRooms.filter(function(r){return (r.members&&r.members.includes(username))||(r.user1===username||r.user2===username);});
+  if(!myRooms.length){list.innerHTML='<div class="empty"><div class="empty-ico">🔒</div>No rooms yet — create one!</div>';return;}
+  list.innerHTML='';
+  myRooms.forEach(function(r){
+    const members=r.members||(r.user1&&r.user2?[r.user1,r.user2]:[]);
+    const others=members.filter(function(m){return m!==username;});
+    const isGroup=members.length>2;
+    const card=document.createElement('div');card.className='priv-room-card';
+    card.innerHTML='<div class="priv-room-name">'+(isGroup?'👥':'🔒')+' '+(r.name||others.join(', '))+'</div><div class="priv-room-badge">'+members.length+' MEMBERS</div>';
+    card.onclick=function(){openPrivRoom(r);};
+    list.appendChild(card);
+  });
+}
+async function createPrivRoom(){
+  const friendsRaw=document.getElementById('priv-friend-inp').value.trim().toLowerCase();
+  const roomName=document.getElementById('priv-room-name-inp')?.value.trim()||'';
+  if(!friendsRaw)return showToast('Enter at least one username');
+  const friends=friendsRaw.split(',').map(function(f){return f.trim();}).filter(function(f){return f&&f!==username;});
+  if(!friends.length)return showToast("Add someone else to the room!");
+  const members=[username,...friends];
+  const roomId='room_'+Date.now()+'_'+username;
+  const room={id:roomId,name:roomName||friends.join(', '),members,created:new Date().toISOString()};
+  const{error}=await sb.from('private_rooms').insert(room);
+  if(error){showToast('Error: '+error.message);return;}
+  privRooms.push(room);
+  document.getElementById('priv-friend-inp').value='';
+  if(document.getElementById('priv-room-name-inp'))document.getElementById('priv-room-name-inp').value='';
+  openPrivRoom(room);
+}
+async function loadPrivRooms(){
+  const{data:d1}=await sb.from('private_rooms').select('*').contains('members',[username]);
+  const{data:d2}=await sb.from('private_rooms').select('*').or('user1.eq.'+username+',user2.eq.'+username);
+  const all=[...(d1||[]),...(d2||[])];const seen=new Set();privRooms=all.filter(function(r){if(seen.has(r.id))return false;seen.add(r.id);return true;});
+}
+function openPrivRoom(room){
+  currentRoom=room;
+  const members=room.members||(room.user1&&room.user2?[room.user1,room.user2]:[]);
+  const others=members.filter(function(m){return m!==username;});
+  const isGroup=members.length>2;
+  document.getElementById('priv-chat-title').textContent=(isGroup?'👥 ':'🔒 ')+(room.name||others.join(', '));
+  document.getElementById('collab-rooms-view').style.display='none';
+  document.getElementById('collab-chat-view').style.display='block';
+  loadPrivMsgs();
+  if(window._privPoll)clearInterval(window._privPoll);
+  window._privPoll=setInterval(loadPrivMsgs,2000);
+}
+function showRoomsView(){
+  document.getElementById('collab-rooms-view').style.display='block';
+  document.getElementById('collab-chat-view').style.display='none';
+  if(window._privPoll)clearInterval(window._privPoll);
+  currentRoom=null;renderPrivRooms();
+}
+async function loadPrivMsgs(){
+  if(!currentRoom)return;
+  const{data}=await sb.from('private_msgs').select('*').eq('room_id',currentRoom.id).order('created_at',{ascending:true}).limit(100);
+  privMsgs=data||[];renderPrivMsgs();
+}
+function renderPrivMsgs(){
+  const area=document.getElementById('priv-chat-area');if(!area)return;
+  if(!privMsgs.length){area.innerHTML='<div class="empty"><div class="empty-ico">🔒</div>Start the conversation!</div>';return;}
+  area.innerHTML='';
+  const mentorHistory=document.getElementById('room-mentor-history');
+  if(mentorHistory)mentorHistory.innerHTML='';
+  privMsgs.forEach(function(m){
+    const mine=m.username===username;
+    const isAI=m.user_id==='ai'||m.username==='🤖 Mentor';
+    const div=document.createElement('div');
+    if(isAI){
+      div.className='priv-msg ai-msg';
+      div.innerHTML='<div class="priv-msg-user">🤖 MENTOR AI</div><div class="priv-msg-text">'+m.text+'</div>';
+      // Also add to mentor history panel
+      if(mentorHistory){
+        const mDiv=document.createElement('div');
+        mDiv.style.cssText='background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:8px 10px;';
+        const time=m.created_at?new Date(m.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+        mDiv.innerHTML='<div style="font-size:8px;color:var(--mentor);margin-bottom:4px;">🤖 '+time+'</div><div style="font-size:11px;line-height:1.5;">'+m.text+'</div>';
+        mentorHistory.appendChild(mDiv);
+      }
+    } else {
+      div.className='priv-msg'+(mine?' mine':' other');
+      const editBtn=mine?'<button onclick="editPrivMsg(this,\''+m.id+'\')" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:10px;float:right;">✏️</button>':'';
+      const userLabel=mine?'':'<div class="priv-msg-user">'+m.username+'</div>';
+      const imgHtml=m.img_url?'<img src="'+m.img_url+'" class="msg-img">':'';
+      div.innerHTML=editBtn+userLabel+imgHtml+'<div class="priv-msg-text" id="pmsg-'+m.id+'">'+m.text+'</div>';
+    }
+    area.appendChild(div);
+  });
+  area.scrollTop=area.scrollHeight;
+  if(mentorHistory)mentorHistory.scrollTop=mentorHistory.scrollHeight;
+}
+async function sendPrivMsg(){
+  if(!currentRoom)return;
+  const inp=document.getElementById('priv-chat-inp');
+  const text=inp.value.trim();
+  if(!text&&!privImgData)return;
+  inp.value='';
+  let msgText=text||'';
+  let imgUrl=null;
+  if(privImgData){
+    imgUrl='data:'+privImgData.type+';base64,'+privImgData.base64;
+    msgText=(text?text+' ':'')+'[image]';
+    clearPrivImg();
+  }
+  await sb.from('private_msgs').insert({room_id:currentRoom.id,user_id:uid,username,text:msgText,img_url:imgUrl,created_at:new Date().toISOString()});
+  await loadPrivMsgs();
+}
+async function editPrivMsg(btn,msgId){
+  const el=document.getElementById('pmsg-'+msgId);if(!el)return;
+  if(el.contentEditable==='true'){
+    el.contentEditable='false';
+    el.style.outline='';
+    const newText=el.innerText.trim();
+    if(newText){
+      await sb.from('private_msgs').update({text:newText}).eq('id',msgId);
+      showToast('Edited ✓');
+      // Mentor reacts in the room
+      if(currentRoom){
+        const replyEl=document.getElementById('room-mentor-reply');
+        if(replyEl)replyEl.innerHTML='<div class="mentor-center-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+        const members=currentRoom.members||(currentRoom.user1&&currentRoom.user2?[currentRoom.user1,currentRoom.user2]:[]);
+        const sysP='You are Mentor AI. A user just edited their message to: "'+newText+'". React helpfully to the group. Be concise and use emojis.';
+        try{
+          const data=await groqFetch([{role:'system',content:sysP},{role:'user',content:newText}]);
+          const reply=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'...';
+          if(replyEl)replyEl.innerHTML='';
+          await sb.from('private_msgs').insert({room_id:currentRoom.id,user_id:'ai',username:'🤖 Mentor',text:'↩️ Re: edit — '+reply,created_at:new Date().toISOString()});
+          await loadPrivMsgs();
+        }catch(e){if(replyEl)replyEl.innerHTML='';}
+      }
+    }
+  }else{
+    el.contentEditable='true';
+    el.style.outline='1px solid rgba(255,255,255,0.4)';
+    el.focus();
+    const range=document.createRange();range.selectNodeContents(el);range.collapse(false);
+    window.getSelection().removeAllRanges();window.getSelection().addRange(range);
+  }
+}
+function toggleRoomMentor(){
+  const panel=document.getElementById('room-mentor-panel');
+  panel.classList.toggle('show');
+  const btn=document.getElementById('btn-room-mentor');
+  btn.style.background=panel.classList.contains('show')?'rgba(167,139,250,0.25)':'rgba(167,139,250,0.1)';
+}
+async function askMentorInRoom(){
+  if(!currentRoom)return;
+  const inp=document.getElementById('room-mentor-inp');
+  const replyEl=document.getElementById('room-mentor-reply');
+  const text=inp.value.trim()||'Give the group some advice based on the conversation so far.';
+  inp.value='';
+  const historyEl=document.getElementById('room-mentor-history');
+  replyEl.innerHTML='<div class="mentor-center-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  const context=privMsgs.slice(-10).map(function(m){return m.username+': '+m.text;}).join('\n');
+  const members=currentRoom.members||(currentRoom.user1&&currentRoom.user2?[currentRoom.user1,currentRoom.user2]:[]);
+  const sysP='You are Mentor AI in a group room called "'+(currentRoom.name||'Private Room')+'" with members: '+members.join(', ')+'. Here is their recent conversation:\n'+context+'\n\nGive helpful, encouraging advice. Be concise and use emojis.';
+  try{
+    // Build multimodal message if image is attached
+  let mentorUserContent;
+  if(privImgData){
+    mentorUserContent=[{type:'image_url',image_url:{url:'data:'+privImgData.type+';base64,'+privImgData.base64}},{type:'text',text:text}];
+    clearPrivImg();
+  } else {
+    mentorUserContent=text;
+  }
+  const data=await groqFetch([{role:'system',content:sysP},{role:'user',content:mentorUserContent}]);
+    const reply=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'...';
+    replyEl.textContent=reply;
+    // Also post to chat so everyone sees it
+    await sb.from('private_msgs').insert({room_id:currentRoom.id,user_id:'ai',username:'🤖 Mentor',text:reply,created_at:new Date().toISOString()});
+    await loadPrivMsgs();
+  }catch(e){replyEl.textContent='Error: '+e.message;showToast('Error: '+e.message);}
+}
+
+// COMMUNITY
+async function initCommunity(){
+  await Promise.all([loadFeed(),loadChat()]);
+  subscribeRealtime();
+}
+function switchComm(tab){
+  commTab=tab;
+  document.querySelectorAll('.comm-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.comm-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('comm-'+tab).classList.add('active');
+}
+
+// FEED
+async function loadFeed(){
+  const{data}=await sb.from('community_posts').select('*').order('created_at',{ascending:false}).limit(50);
+  feedPosts=data||[];renderFeed();
+}
+async function postFeed(){
+  const text=document.getElementById('feed-text').value.trim();
+  if(!text||text.length<3)return showToast('Write something first!');
+  if(text.length>280)return showToast('Max 280 characters');
+  const goalId=document.getElementById('feed-goal-sel').value||null;
+  const goalName=goalId?goals.find(g=>g.id===goalId)?.name:null;
+  const{data,error}=await sb.from('community_posts').insert({user_id:uid,username,text,goal_name:goalName,likes:[],created_at:new Date().toISOString()}).select().single();
+  if(error)return showToast('Need to create community_posts table in Supabase');
+  feedPosts.unshift(data);renderFeed();document.getElementById('feed-text').value='';showToast('Posted! 🎉');
+}
+async function likePost(id){
+  const post=feedPosts.find(p=>p.id===id);if(!post)return;
+  const likes=post.likes||[];const already=likes.includes(uid);
+  const newLikes=already?likes.filter(l=>l!==uid):[...likes,uid];
+  await sb.from('community_posts').update({likes:newLikes}).eq('id',id);
+  post.likes=newLikes;renderFeed();
+}
+async function deletePost(id){
+  const post=feedPosts.find(p=>p.id===id);if(!post)return;
+  if(isAdmin){await sb.from('community_posts').delete().eq('id',id);}
+  else if(post.user_id===uid){await sb.from('community_posts').delete().eq('id',id).eq('user_id',uid);}
+  else{return showToast('No permission');}
+  feedPosts=feedPosts.filter(p=>p.id!==id);renderFeed();showToast('Deleted ✓');
+}
+function renderFeed(){
+  const list=document.getElementById('feed-list');
+  if(!feedPosts.length){list.innerHTML='<div class="empty"><div class="empty-ico">📣</div>No posts yet — be first!</div>';return;}
+  list.innerHTML='';
+  feedPosts.forEach(post=>{
+    const likes=post.likes||[];const liked=likes.includes(uid);
+    const canDel=isAdmin||post.user_id===uid||post.username===username;
+    const card=document.createElement('div');card.className='feed-card';
+    card.innerHTML=`<div class="feed-top"><div class="feed-user">@${post.username}</div><div class="feed-time">${timeAgo(post.created_at)}</div></div>${post.goal_name?`<div class="feed-goal-tag">🎯 ${post.goal_name}</div>`:''}<div class="feed-text">${post.text}</div><div class="feed-bot"><button class="btn-like ${liked?'liked':''}" onclick="likePost('${post.id}')">♥ ${likes.length}</button>${canDel?`<button class="btn-admin-del" onclick="deletePost('${post.id}')">DELETE</button>`:''}</div>`;
+    list.appendChild(card);
+  });
+}
+function updateFeedSel(){
+  const sel=document.getElementById('feed-goal-sel');
+  sel.innerHTML='<option value="">No goal tag</option>'+goals.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+}
+
+// LIVE CHAT
+async function loadChat(){
+  const{data}=await sb.from('community_chat').select('*').order('created_at',{ascending:true}).limit(100);
+  liveMsgs=data||[];renderChatMsgs();scrollChatMsgs();
+}
+async function sendChat(){
+  const inp=document.getElementById('chat-send-inp');
+  const text=inp.value.trim();if(!text)return;if(text.length>200)return showToast('Max 200 chars');
+  inp.value='';
+  const{error}=await sb.from('community_chat').insert({user_id:uid,username,text,created_at:new Date().toISOString()});
+  if(error)showToast('Need community_chat table in Supabase');
+}
+const SUITED_PFP='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCABQAFADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDyS3g5GVPtzWrDG46YDfgOKpwIpdchckZ64xWvbxgqCxAGerH+lAFiNTMqlgS69cCuh8M6gNDubnVbkBbK1t2+0NjnDDaAB3YnAAPB/DIxECxnKMVY8cVpeJY3vPC+hxWTCC4a/NvJGjYVvkysjLz833vm7Y4xmgDLtPGniGIy2i30lnFcHcjwoiPg9AW25yPrUknirxDa2sVq2r3Nz+8Vk+1L5u7B4XJB6gkY6EEjBrmL28vNC1La0hZonKDa/Qjqc9/rWpHrseum3glkWW8c7dixkAAc5Zj1oA7S01bwrrdyIL+F9Nu5UKL5APkueofB+6Vwdy5IPasK4sGgnaKQKSDjcvIPHBB9CMEfWsG/lhaOZiRMytl8N945x1+o/Gu2miZdH0+W62CX7NEhVJUkDYQbXG09CuODyCMc8UAcxeweTHhUY47cVi3UBMTSbSAR3+tdXcNCVVlUluQ2TWDeR7mYHhccGgBluh2hXcEe+K0IQ6EYDMvbPamxW5KDA+XgZ7YrQtrNmAJBb35/pQAsTGV+EwR3b/OM1veTJJ4a1Ce3b9/phj1WNfXymw6590dvyFVILQyEoAd46KDmugsQtha3FrJG093eWc8cVor4MqlCrM2PuqM9e5wB3wAST/Drwv490a31q0a7s5bvEqz7V3kYC4dM46rng9SfWuX1v4G39hbJ/YWqm8uZNwaKVBDlQM8MCeT6HA969ZtI7bw5p6CJBLo/lIH8pd3k4UDeAOqnHOORjPrS3PiPTksXn0/UIrwH5VkikDhSRkKG5y2OcZ46nsCAeJeFvBt/oN1FqeuHyPs8wkhsg4LzSRsQMkE4QHJJ74wOpxq3V7JOyea4ITIUYC7ecngD1zV29le9vGLHBYdADjH/ANasm6tgZjnIA4+9QBXuXzuUtknuDWPLINpBGDmtUxr8wC8AcEAnNUpreVydqPuAB49KALlmzNFsO0H1AxW9EbaxtFlu7mKyiY5LzuF3D1UdT+ANZWkW0c93bRu+UaRFY+oJFcHdXj6rrF1dXR8x7iV3569SQB7Y4A9hQB2uo+PtKscppNq1/OOk1wDHCp9l+8/47ayfCfiu8g+IlvrOpSvcGU+TcuR92NsDgdAF4IA4wKy49Lt3TKgHPQ54pj28VrNAy5WNjhscEZ4P4j+lAH074r8Q6H4NsBqt1JsFw4RLeH5vPPXIHQcHJbp65yK8wv8AXdLsdAh1/RYxLFd6i0OsWLARlXcbo2XGdpAX5W77mz3A2dKh07xj8LtQlu45JLuztZILhcg+W8allZeQVGfmx0zmuX0Sys9T+D3iRGCi/sD9qD95F4aM/htb/JoA1rJ9L1tWm0y4LkL89s67J4z/ALSd/quRUE9nsY749wPIB9a4WGJYZFu0cnzNpD5IZc4xjHSuq0bxHfXmpW+malIt2k4ZIZZB+9jYKSvzfxAkYw2evBoAhubcrJlQcLyCRxn0FZd0ZAzPuAHXjIro7mVX3FNo3D8KxLzBLEhUYcexxQBXsLl0dJN/zIQTyOMVxUeIrpgc8N/X+dbiyOYflPPtWVPasSWzzmgCWzv0trt4GOYi/wAjDt/9arWqLlAw5Vjn8cc/59qw5I9p6c1ZS/cQmGQ7kxgHutAHV+E/ENxpM955Tk2+o2b29zCp5J2lQwHqDg/ifWqPhPxBJp9vrFgV3f2lYfZQD/CwYHP/AHzvH41gxuvH7xkAbcGT+E9DViGRxPJNCUaeQYMvRVHdue5/p70Aa+lqt61rZPdW9oAATLcMQoAGccAkn0FWp7qx0zxnpK2OoSXcMM6PJK0PlgHd0A7jHeucjuUt0Lv8zqMJk9TjrUdhmS7WT7zZyfc5zQB6W+ZI8KuMd/SsW8DJKwYqw75q1aXTPG29yDjgbulVL4o5ZXdkA54XJPtQBQilSaNBtAI6fKBn64/nTLqKNkIC4B545xVe3O1AQcZ747Vr+UhtnGzdkZDEYxQBy91F8vC4qgI97YX72fu+v0rbvYwoPIHqBWR+6JKyAg9mH9aAIw3lvhhxnkelTjzAgtw22IPlvcYzn8qlRPtA2MBKAPvLw6/n1qrKnlmRRIrBflz7UARuwldmAwpPA9q1tMgIAIXd7elZcab3AXp6101hCqIo3cnpQBoRoVjAPCnqAeTUNxJAiMBIy8gdM0TgqRt5461nXRZQMn5epC8UAf/Z';
+function getAvatar(uname,ismine){
+  if(uname==='suitedofficial')return '<img class="chat-pfp" src="'+SUITED_PFP+'">';
+  const initials=uname.substring(0,2).toUpperCase();
+  const colors=['#e8b84b','#5b9bd5','#3dd68c','#9b72d4','#e05c7a','#3dd4d4'];
+  const col=colors[uname.charCodeAt(0)%colors.length];
+  return '<div class="chat-pfp-placeholder" style="background:'+col+'22;color:'+col+'">'+initials+'</div>';
+}
+function renderChatMsgs(){
+  const msgs=document.getElementById('chat-msgs');
+  if(!liveMsgs.length){msgs.innerHTML='<div class="empty"><div class="empty-ico">💬</div>No messages yet — say hi!</div>';return;}
+  msgs.innerHTML='';
+  liveMsgs.forEach(function(m){
+    const mine=m.username===username;
+    const canDel=isAdmin||username==='suitedofficial'||mine;
+    const div=document.createElement('div');
+    div.className='chat-msg '+(mine?'mine':'');
+    div.innerHTML='<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">'+getAvatar(m.username,mine)+'<div class="chat-msg-user">'+(mine?'You':'@'+m.username)+'</div><div class="chat-msg-time">'+timeAgo(m.created_at)+'</div></div><div class="chat-msg-text">'+m.text+'</div>';
+    if(canDel){
+      var btn=document.createElement('button');
+      btn.textContent='x';
+      btn.style.cssText='background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;float:right;';
+      btn.onclick=(function(id){return function(){deleteChatMsg(id);};})(m.id);
+      div.querySelector('div').appendChild(btn);
+    }
+    msgs.appendChild(div);
+  });
+}
+function scrollChatMsgs(){const m=document.getElementById('chat-msgs');if(m)m.scrollTop=m.scrollHeight;}
+async function deleteChatMsg(id){if(isAdmin){await sb.from('community_chat').delete().eq('id',id);}else{await sb.from('community_chat').delete().eq('id',id).eq('user_id',uid);}liveMsgs=liveMsgs.filter(function(m){return m.id!==id;});renderChatMsgs();showToast('Deleted ✓');}
+function subscribeRealtime(){
+  if(feedSub)feedSub.unsubscribe();
+  if(chatSub)chatSub.unsubscribe();
+  if(window._chatPoll)clearInterval(window._chatPoll);
+  if(window._feedPoll)clearInterval(window._feedPoll);
+
+  // Realtime subscriptions (primary)
+  feedSub=sb.channel('comm-feed').on('postgres_changes',{event:'*',schema:'public',table:'community_posts'},function(){loadFeed();}).subscribe();
+  chatSub=sb.channel('comm-chat').on('postgres_changes',{event:'INSERT',schema:'public',table:'community_chat'},function(p){
+    var exists=liveMsgs.some(function(m){return m.id===p.new.id;});
+    if(!exists){liveMsgs.push(p.new);renderChatMsgs();scrollChatMsgs();}
+  }).subscribe();
+
+  // Polling fallback (backup) - checks every 1.5 seconds
+  var lastChatCount=liveMsgs.length;
+  var lastFeedCount=feedPosts.length;
+  window._chatPoll=setInterval(async function(){
+    var res=await sb.from('community_chat').select('*').order('created_at',{ascending:true}).limit(100);
+    if(!res.data)return;
+    if(res.data.length!==lastChatCount){
+      lastChatCount=res.data.length;
+      liveMsgs=res.data;
+      renderChatMsgs();
+      scrollChatMsgs();
+    }
+  },1500);
+  window._feedPoll=setInterval(async function(){
+    var res=await sb.from('community_posts').select('*').order('created_at',{ascending:false}).limit(50);
+    if(!res.data)return;
+    if(res.data.length!==lastFeedCount){
+      lastFeedCount=res.data.length;
+      feedPosts=res.data;
+      renderFeed();
+    }
+  },2000);
+}
+
+function renderAll(){renderBudget();renderSavings();renderGoals();updateFeedSel();}
+
+async function showApp(){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('auth').classList.remove('show');
+  document.getElementById('app').style.display='block';
+  document.getElementById('bottom-nav').style.display='flex';
+  document.getElementById('user-name-display').textContent=username.toUpperCase();
+  if(isAdmin)document.getElementById('admin-badge').style.display='block';
+  await loadData();await loadSavedChats();loadPrivRooms();
+}
+
+async function init(){
+  try{
+    const{data:{session},error}=await sb.auth.getSession();
+    if(error&&(error.message?.includes('Refresh Token')||error.message?.includes('refresh_token'))){
+      await sb.auth.signOut();
+      document.getElementById('loading').style.display='none';
+      document.getElementById('auth').classList.add('show');
+      return;
+    }
+    if(session){
+      uid=session.user.id;
+      username=session.user.user_metadata?.username||session.user.email?.split('@')[0]||'user';
+      isAdmin=(username===ADMIN);await showApp();
+    }else{document.getElementById('loading').style.display='none';document.getElementById('auth').classList.add('show');}
+  }catch(e){
+    await sb.auth.signOut();
+    document.getElementById('loading').style.display='none';
+    document.getElementById('auth').classList.add('show');
+  }
+}
+init();
+</script>
+</body>
+</html>
